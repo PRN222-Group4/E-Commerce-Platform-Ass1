@@ -17,43 +17,43 @@ namespace E_Commerce_Platform_Ass1.Data.Database.Configurations
             builder.ToTable("users");
 
             // Primary key
-            builder.HasKey(u => u.id);
+            builder.HasKey(u => u.Id);
 
             // Columns
-            builder.Property(u => u.id)
+            builder.Property(u => u.Id)
                    .IsRequired();
 
-            builder.Property(u => u.name)
+            builder.Property(u => u.Name)
                    .HasMaxLength(100)
                    .IsRequired();
 
-            builder.Property(u => u.password_hash)
+            builder.Property(u => u.PasswordHash)
                    .HasMaxLength(255)
                    .IsRequired();
 
-            builder.Property(u => u.email)
+            builder.Property(u => u.Email)
                    .HasMaxLength(150)
                    .IsRequired();
 
-            builder.Property(u => u.role_id)
+            builder.Property(u => u.RoleId)
                    .IsRequired();
 
-            builder.Property(u => u.status)
+            builder.Property(u => u.Status)
                    .HasDefaultValue(true)
                    .IsRequired();
 
             // Foreign key relationship
             builder.HasOne(u => u.Role)
                    .WithMany(r => r.Users)
-                   .HasForeignKey(u => u.role_id)
+                   .HasForeignKey(u => u.RoleId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Property(u => u.create_at)
+            builder.Property(u => u.CreatedAt)
                    .HasDefaultValueSql("GETDATE()")
                    .IsRequired();
 
             // Indexes
-            builder.HasIndex(u => u.email)
+            builder.HasIndex(u => u.Email)
                    .IsUnique();
 
 

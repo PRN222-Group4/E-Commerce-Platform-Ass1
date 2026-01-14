@@ -2,6 +2,7 @@ using E_Commerce_Platform_Ass1.Data.Database;
 using E_Commerce_Platform_Ass1.Data.Repositories;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
 using E_Commerce_Platform_Ass1.Service.Services;
+using E_Commerce_Platform_Ass1.Service.Services.IServices;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
