@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace E_Commerce_Platform_Ass1.Service.Services
+namespace E_Commerce_Platform_Ass1.Service.Services.IServices
 {
     public interface IUserService
     {

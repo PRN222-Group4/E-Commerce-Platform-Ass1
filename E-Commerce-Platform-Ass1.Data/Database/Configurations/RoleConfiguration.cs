@@ -12,26 +12,26 @@ namespace E_Commerce_Platform_Ass1.Data.Database.Configurations
             builder.ToTable("roles");
 
             // Primary key
-            builder.HasKey(r => r.id);
+            builder.HasKey(r => r.RoleId);
 
             // Columns
-            builder.Property(r => r.id)
+            builder.Property(r => r.RoleId)
                    .IsRequired();
 
-            builder.Property(r => r.name)
+            builder.Property(r => r.Name)
                    .HasMaxLength(50)
                    .IsRequired();
 
-            builder.Property(r => r.description)
+            builder.Property(r => r.Description)
                    .HasMaxLength(255)
                    .IsRequired(false);
 
-            builder.Property(r => r.create_at)
+            builder.Property(r => r.CreatedAt)
                    .HasDefaultValueSql("GETDATE()")
                    .IsRequired();
 
             // Indexes
-            builder.HasIndex(r => r.name)
+            builder.HasIndex(r => r.Name)
                    .IsUnique();
         }
     }

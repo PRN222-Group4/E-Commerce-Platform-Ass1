@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using BCrypt.Net;
 using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
+using E_Commerce_Platform_Ass1.Service.Services.IServices;
 
 namespace E_Commerce_Platform_Ass1.Service.Services
 {
@@ -34,13 +35,13 @@ namespace E_Commerce_Platform_Ass1.Service.Services
 
             var user = new User
             {
-                id = Guid.NewGuid(),
-                name = name,
-                email = email,
-                password_hash = HashPassword(password),
-                role_id = userRole.id,
-                status = true,
-                create_at = DateTime.UtcNow
+                Id = Guid.NewGuid(),
+                Name = name,
+                Email = email,
+                PasswordHash = HashPassword(password),
+                RoleId = userRole.RoleId,
+                Status = true,
+                CreatedAt = DateTime.UtcNow
             };
 
             await _userRepository.CreateAsync(user);
@@ -55,17 +56,17 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return null;
             }
 
-            if (!VerifyPassword(password, user.password_hash))
+            if (!VerifyPassword(password, user.PasswordHash))
             {
                 return null;
             }
 
             return new AuthenticatedUser
             {
-                Id = user.id,
-                Name = user.name,
-                Email = user.email,
-                Role = user.Role?.name ?? "Unknown"
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Role = user.Role?.Name ?? "Unknown"
             };
         }
 

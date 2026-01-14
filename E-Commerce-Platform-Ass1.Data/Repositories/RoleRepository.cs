@@ -21,7 +21,7 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
 
         public async Task<Role?> GetByNameAsync(string name)
         {
-            return await _context.Roles.FirstOrDefaultAsync(r => r.name == name);
+            return await _context.Roles.FirstOrDefaultAsync(r => r.Name == name);
         }
 
         public async Task<IEnumerable<Role>> GetAllAsync()
