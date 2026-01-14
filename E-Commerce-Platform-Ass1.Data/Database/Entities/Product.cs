@@ -27,7 +27,7 @@
 
         public Shop Shop { get; set; } = null!;
 
-        public ICollection<ProductVariant> ProductVairants { get; set; } = new List<ProductVariant>();
+        public ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
 
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }

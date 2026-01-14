@@ -19,8 +19,6 @@
         // Navigation property
         public Role Role { get; set; } = null!;
 
-        public ICollection<Shop> Shops { get; set; } = new List<Shop>();
-
         public ICollection<Cart> Carts { get; set; } = new List<Cart>();
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();

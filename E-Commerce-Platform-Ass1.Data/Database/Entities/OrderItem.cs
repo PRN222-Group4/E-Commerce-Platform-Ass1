@@ -17,7 +17,7 @@
         // Navigation property
         public Order Order { get; set; } = null!;
 
-        public ProductVariant ProductVairant { get; set; } = null!;
+        public ProductVariant ProductVariant { get; set; } = null!;
 
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
