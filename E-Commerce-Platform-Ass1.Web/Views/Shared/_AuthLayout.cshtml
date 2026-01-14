@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>@ViewData["Title"] - EShopper</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="E-Commerce Platform" name="keywords">
+    <meta content="E-Commerce Platform" name="description">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"> 
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="~/css/style.css" rel="stylesheet" asp-append-version="true">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #EDF1FF 0%, #f5f5f5 100%);
+            min-height: 100vh;
+        }
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .auth-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        .auth-header {
+            background: linear-gradient(135deg, #D19C97 0%, #c88a85 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+        }
+        .auth-header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .auth-body {
+            padding: 40px;
+        }
+        .back-to-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #D19C97;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .back-to-home:hover {
+            color: #c88a85;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <a asp-controller="Home" asp-action="Index" class="back-to-home">
+        <i class="fas fa-arrow-left mr-2"></i>Về trang chủ
+    </a>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <a asp-controller="Home" asp-action="Index" class="text-white text-decoration-none">
+                    <h1 class="mb-0"><span class="font-weight-bold">E</span>Shopper</h1>
+                </a>
+            </div>
+            <div class="auth-body">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
