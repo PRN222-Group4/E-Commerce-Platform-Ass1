@@ -1,3 +1,4 @@
+using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Models;
 
 namespace E_Commerce_Platform_Ass1.Service.Services.IServices
@@ -27,49 +28,4 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
         /// </summary>
         Task<List<CategoryDto>> GetAllCategoriesAsync();
     }
-
-
-
-    /// <summary>
-    /// DTO để tạo sản phẩm mới
-    /// </summary>
-    public class CreateProductDto
-    {
-        public Guid ShopId { get; set; }
-        public Guid CategoryId { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public decimal BasePrice { get; set; }
-        public string ImageUrl { get; set; } = string.Empty;
-    }
-
-    /// <summary>
-    /// DTO hiển thị thông tin sản phẩm
-    /// </summary>
-    public class ProductDto
-    {
-        public Guid Id { get; set; }
-        public Guid ShopId { get; set; }
-        public Guid CategoryId { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public decimal BasePrice { get; set; }
-        public string Status { get; set; } = string.Empty;
-        public decimal AvgRating { get; set; }
-        public string ImageUrl { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
-        public string? CategoryName { get; set; }
-        public string? ShopName { get; set; }
-    }
-
-    /// <summary>
-    /// DTO cho Category
-    /// </summary>
-    public class CategoryDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
-
-    
 }

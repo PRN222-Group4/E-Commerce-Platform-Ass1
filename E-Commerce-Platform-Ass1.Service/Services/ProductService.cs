@@ -1,5 +1,6 @@
 using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
+using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Models;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
 
@@ -116,8 +117,6 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             var categories = await _categoryRepository.GetAllAsync();
             return categories.Select(c => new CategoryDto { Id = c.Id, Name = c.Name }).ToList();
         }
-
-        // #region Private Helpers
 
         private static ProductDto MapToDto(Product product, string? shopName = null)
         {

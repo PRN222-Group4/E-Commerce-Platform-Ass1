@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
+using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
 using E_Commerce_Platform_Ass1.Web.Models;
 using Microsoft.AspNetCore.Authorization;
