@@ -1,6 +1,3 @@
-using System;
-using System.Threading.Tasks;
-using BCrypt.Net;
 using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
@@ -27,7 +24,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
 
             // Get default "User" role
-            var userRole = await _roleRepository.GetByNameAsync("Customer");
+            var userRole = await _roleRepository.GetByNameAsync("User");
             if (userRole == null)
             {
                 throw new InvalidOperationException("Default 'User' role not found. Please seed roles first.");
