@@ -41,7 +41,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 PasswordHash = HashPassword(password),
                 RoleId = userRole.RoleId,
                 Status = true,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
             };
 
             await _userRepository.CreateAsync(user);
@@ -57,6 +57,23 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
 
             if (!VerifyPassword(password, user.PasswordHash))
+            {
+                return null;
+            }
+
+            return new AuthenticatedUser
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Role = user.Role?.Name ?? "Unknown",
+            };
+        }
+
+        public async Task<AuthenticatedUser?> GetUserByIdAsync(Guid userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
             {
                 return null;
             }
@@ -99,4 +116,3 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         }
     }
 }
-

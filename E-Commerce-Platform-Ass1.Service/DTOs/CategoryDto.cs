@@ -1,0 +1,11 @@
+namespace E_Commerce_Platform_Ass1.Service.DTOs
+{
+    /// <summary>
+    /// DTO cho Category
+    /// </summary>
+    public class CategoryDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+}

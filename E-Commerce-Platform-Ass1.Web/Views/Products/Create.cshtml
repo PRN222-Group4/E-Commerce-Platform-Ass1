@@ -1,0 +1,121 @@
+@model E_Commerce_Platform_Ass1.Web.Models.CreateProductViewModel
+@{
+    ViewData["Title"] = "Thêm sản phẩm mới";
+    Layout = "~/Views/Shared/_EShopperLayout.cshtml";
+}
+
+<div class="container-fluid pt-5">
+    <div class="row px-xl-5">
+        <div class="col-lg-8 mx-auto">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-light p-3 rounded">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Home" asp-action="Index">Trang chủ</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Products" asp-action="Index">Sản phẩm</a>
+                    </li>
+                    <li class="breadcrumb-item active">Thêm mới</li>
+                </ol>
+            </nav>
+
+            <!-- Form Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus-circle mr-2"></i>Thêm sản phẩm mới
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Tên sản phẩm -->
+                        <div class="form-group">
+                            <label asp-for="Name" class="font-weight-semi-bold">
+                                <i class="fas fa-tag text-primary mr-2"></i>@Html.DisplayNameFor(m => m.Name)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Name" class="form-control py-3" placeholder="Nhập tên sản phẩm" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Mô tả -->
+                        <div class="form-group">
+                            <label asp-for="Description" class="font-weight-semi-bold">
+                                <i class="fas fa-align-left text-primary mr-2"></i>@Html.DisplayNameFor(m => m.Description)
+                            </label>
+                            <textarea asp-for="Description" class="form-control" rows="4" 
+                                      placeholder="Mô tả chi tiết về sản phẩm..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row">
+                            <!-- Giá -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="BasePrice" class="font-weight-semi-bold">
+                                        <i class="fas fa-money-bill text-primary mr-2"></i>@Html.DisplayNameFor(m => m.BasePrice)
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <input asp-for="BasePrice" type="number" step="1000" min="0" 
+                                               class="form-control py-3" placeholder="0" />
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">₫</span>
+                                        </div>
+                                    </div>
+                                    <span asp-validation-for="BasePrice" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Danh mục -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="CategoryId" class="font-weight-semi-bold">
+                                        <i class="fas fa-folder text-primary mr-2"></i>@Html.DisplayNameFor(m => m.CategoryId)
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control py-3">
+                                        <option value="">-- Chọn danh mục --</option>
+                                    </select>
+                                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hình ảnh -->
+                        <div class="form-group">
+                            <label asp-for="ImageUrl" class="font-weight-semi-bold">
+                                <i class="fas fa-image text-primary mr-2"></i>@Html.DisplayNameFor(m => m.ImageUrl)
+                            </label>
+                            <input asp-for="ImageUrl" class="form-control py-3" 
+                                   placeholder="https://example.com/image.jpg" />
+                            <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle mr-1"></i>Nhập URL hình ảnh sản phẩm
+                            </small>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                                <i class="fas fa-arrow-left mr-2"></i>Hủy
+                            </a>
+                            <button type="submit" class="btn btn-primary px-5">
+                                <i class="fas fa-save mr-2"></i>Lưu sản phẩm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
