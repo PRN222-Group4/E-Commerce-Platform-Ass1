@@ -1,24 +1,31 @@
 @model E_Commerce_Platform_Ass1.Web.Models.EditProductViewModel
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = "Chỉnh sửa sản phẩm";
-    Layout = "~/Views/Shared/_EShopperLayout.cshtml";
+    Layout = "~/Views/Shared/_ShopDashboardLayout.cshtml";
+    var cloudName = Configuration["CloudinarySettings:CloudName"] ?? "";
+    var uploadPreset = Configuration["CloudinarySettings:UploadPreset"] ?? "";
 }
 
-<div class="container-fluid pt-5">
+<!-- Page Header Start -->
+<div class="container-fluid bg-secondary mb-4">
+    <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 180px">
+        <h1 class="font-weight-semi-bold text-uppercase mb-3">
+            <i class="fas fa-edit text-primary mr-2"></i>Chỉnh sửa sản phẩm
+        </h1>
+        <div class="d-inline-flex">
+            <p class="m-0"><a asp-controller="Products" asp-action="Index" class="text-dark">Sản phẩm</a></p>
+            <p class="m-0 px-2">-</p>
+            <p class="m-0">@Model.Name</p>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<div class="container-fluid py-4">
     <div class="row px-xl-5">
-        <div class="col-lg-10 mx-auto">
-            <!-- Breadcrumb -->
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb bg-light p-3 rounded">
-                    <li class="breadcrumb-item">
-                        <a asp-controller="Home" asp-action="Index">Trang chủ</a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a asp-controller="Products" asp-action="Index">Sản phẩm</a>
-                    </li>
-                    <li class="breadcrumb-item active">Chỉnh sửa</li>
-                </ol>
-            </nav>
+        <div class="col-lg-10 offset-lg-1">
 
             <!-- Alert messages -->
             @if (TempData["SuccessMessage"] != null)
@@ -40,47 +47,79 @@
                 </div>
             }
 
-            <!-- Product Info Card -->
+            <!-- Product Overview Card -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">
-                        <i class="fas fa-box mr-2"></i>@Model.Name
+                        <i class="fas fa-box mr-2"></i>Thông tin sản phẩm
                     </h4>
-                    <span class="badge @Model.StatusBadgeClass px-3 py-2">@Model.StatusDisplayName</span>
+                    <span class="badge @Model.StatusBadgeClass px-3 py-2 badge-lg">
+                        <i class="fas fa-info-circle mr-1"></i>@Model.StatusDisplayName
+                    </span>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <div class="row">
-                        <div class="col-md-4">
-                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                            {
-                                <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded" style="max-height: 200px; object-fit: cover;">
-                            }
-                            else
-                            {
-                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;">
-                                    <i class="fas fa-image fa-3x text-muted"></i>
-                                </div>
-                            }
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="position-relative">
+                                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                {
+                                    <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded shadow-sm" style="max-height: 300px; width: 100%; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div class="bg-light rounded shadow-sm d-flex align-items-center justify-content-center" style="height: 300px; border: 2px dashed #dee2e6;">
+                                        <div class="text-center">
+                                            <i class="fas fa-image fa-4x text-muted mb-2"></i>
+                                            <p class="text-muted mb-0">Chưa có hình ảnh</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
                         </div>
                         <div class="col-md-8">
-                            <table class="table table-borderless">
-                                <tr>
-                                    <th width="150"><i class="fas fa-tag text-primary mr-2"></i>Danh mục:</th>
-                                    <td>@(Model.CategoryName ?? "Chưa phân loại")</td>
-                                </tr>
-                                <tr>
-                                    <th><i class="fas fa-money-bill text-primary mr-2"></i>Giá cơ bản:</th>
-                                    <td><strong class="text-danger">@Model.BasePrice.ToString("N0") ₫</strong></td>
-                                </tr>
-                                <tr>
-                                    <th><i class="fas fa-calendar text-primary mr-2"></i>Ngày tạo:</th>
-                                    <td>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                </tr>
-                                <tr>
-                                    <th><i class="fas fa-align-left text-primary mr-2"></i>Mô tả:</th>
-                                    <td>@(string.IsNullOrEmpty(Model.Description) ? "Chưa có mô tả" : Model.Description)</td>
-                                </tr>
-                            </table>
+                            <div class="product-info-details">
+                                <div class="mb-3 pb-3 border-bottom">
+                                    <label class="text-muted small mb-1 d-block">
+                                        <i class="fas fa-tag text-primary mr-1"></i>Tên sản phẩm
+                                    </label>
+                                    <h5 class="mb-0 font-weight-bold">@Model.Name</h5>
+                                </div>
+                                
+                                <div class="row mb-3 pb-3 border-bottom">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label class="text-muted small mb-1 d-block">
+                                            <i class="fas fa-folder text-primary mr-1"></i>Danh mục
+                                        </label>
+                                        <p class="mb-0 font-weight-semi-bold">@(Model.CategoryName ?? "Chưa phân loại")</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="text-muted small mb-1 d-block">
+                                            <i class="fas fa-money-bill-wave text-primary mr-1"></i>Giá cơ bản
+                                        </label>
+                                        <p class="mb-0">
+                                            <strong class="text-danger h5">@Model.BasePrice.ToString("N0") ₫</strong>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3 pb-3 border-bottom">
+                                    <label class="text-muted small mb-1 d-block">
+                                        <i class="fas fa-calendar-alt text-primary mr-1"></i>Ngày tạo
+                                    </label>
+                                    <p class="mb-0">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                                </div>
+
+                                <div>
+                                    <label class="text-muted small mb-1 d-block">
+                                        <i class="fas fa-align-left text-primary mr-1"></i>Mô tả
+                                    </label>
+                                    <p class="mb-0 text-justify">
+                                        @(string.IsNullOrEmpty(Model.Description) ? 
+                                            "<span class='text-muted font-italic'>Chưa có mô tả</span>" : 
+                                            Model.Description)
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -88,9 +127,10 @@
 
             <!-- Variants Card -->
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-secondary text-white py-3 d-flex justify-content-between align-items-center">
+                <div class="card-header bg-gradient-primary text-white py-3 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #D19C97 0%, #c88a84 100%);">
                     <h5 class="mb-0">
-                        <i class="fas fa-cubes mr-2"></i>Biến thể sản phẩm (@Model.Variants.Count)
+                        <i class="fas fa-cubes mr-2"></i>Biến thể sản phẩm 
+                        <span class="badge badge-light text-primary ml-2">@Model.Variants.Count</span>
                     </h5>
                     @if (Model.CanAddVariant)
                     {
@@ -99,83 +139,102 @@
                         </a>
                     }
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     @if (Model.Variants.Any())
                     {
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Tên biến thể</th>
-                                        <th>SKU</th>
-                                        <th>Kích thước</th>
-                                        <th>Màu sắc</th>
-                                        <th>Giá</th>
-                                        <th>Tồn kho</th>
-                                        <th>Trạng thái</th>
-                                        @if (Model.Status == "draft")
-                                        {
-                                            <th class="text-center">Thao tác</th>
-                                        }
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var variant in Model.Variants)
-                                    {
-                                        <tr>
-                                            <td>
-                                                <strong>@variant.VariantName</strong>
-                                            </td>
-                                            <td><code>@(string.IsNullOrEmpty(variant.Sku) ? "-" : variant.Sku)</code></td>
-                                            <td>@(string.IsNullOrEmpty(variant.Size) ? "-" : variant.Size)</td>
-                                            <td>@(string.IsNullOrEmpty(variant.Color) ? "-" : variant.Color)</td>
-                                            <td><strong class="text-danger">@variant.Price.ToString("N0") ₫</strong></td>
-                                            <td>
+                        <div class="row">
+                            @foreach (var variant in Model.Variants)
+                            {
+                                <div class="col-lg-6 col-md-12 mb-3">
+                                    <div class="variant-card border rounded p-3 h-100" style="transition: all 0.3s ease; background: #f8f9fa;">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1 font-weight-bold">
+                                                    <i class="fas fa-cube text-primary mr-2"></i>@variant.VariantName
+                                                </h6>
+                                                @if (!string.IsNullOrEmpty(variant.Sku))
+                                                {
+                                                    <small class="text-muted">
+                                                        <code class="bg-white px-2 py-1 rounded">SKU: @variant.Sku</code>
+                                                    </small>
+                                                }
+                                            </div>
+                                            @if (Model.Status == "draft")
+                                            {
+                                                <form asp-action="DeleteVariant" method="post" class="d-inline"
+                                                      onsubmit="return confirm('Bạn có chắc muốn xóa biến thể này?');">
+                                                    <input type="hidden" name="variantId" value="@variant.Id" />
+                                                    <input type="hidden" name="productId" value="@Model.Id" />
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Xóa biến thể">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                        
+                                        <div class="row mb-2">
+                                            <div class="col-6">
+                                                <small class="text-muted d-block mb-1">
+                                                    <i class="fas fa-ruler text-primary mr-1"></i>Kích thước
+                                                </small>
+                                                <span class="font-weight-semi-bold">@(string.IsNullOrEmpty(variant.Size) ? "-" : variant.Size)</span>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted d-block mb-1">
+                                                    <i class="fas fa-palette text-primary mr-1"></i>Màu sắc
+                                                </small>
+                                                <span class="font-weight-semi-bold">@(string.IsNullOrEmpty(variant.Color) ? "-" : variant.Color)</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-2">
+                                            <div class="col-6">
+                                                <small class="text-muted d-block mb-1">
+                                                    <i class="fas fa-money-bill-wave text-primary mr-1"></i>Giá
+                                                </small>
+                                                <span class="font-weight-bold text-danger h6 mb-0">@variant.Price.ToString("N0") ₫</span>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted d-block mb-1">
+                                                    <i class="fas fa-boxes text-primary mr-1"></i>Tồn kho
+                                                </small>
                                                 @if (variant.Stock > 10)
                                                 {
-                                                    <span class="badge badge-success">@variant.Stock</span>
+                                                    <span class="badge badge-success badge-lg">@variant.Stock</span>
                                                 }
                                                 else if (variant.Stock > 0)
                                                 {
-                                                    <span class="badge badge-warning">@variant.Stock</span>
+                                                    <span class="badge badge-warning badge-lg">@variant.Stock</span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge badge-danger">Hết hàng</span>
+                                                    <span class="badge badge-danger badge-lg">Hết hàng</span>
                                                 }
-                                            </td>
-                                            <td>
-                                                <span class="badge @(variant.Status == "active" ? "badge-success" : "badge-secondary")">
-                                                    @(variant.Status == "active" ? "Hoạt động" : variant.Status)
-                                                </span>
-                                            </td>
-                                            @if (Model.Status == "draft")
-                                            {
-                                                <td class="text-center">
-                                                    <form asp-action="DeleteVariant" method="post" class="d-inline"
-                                                          onsubmit="return confirm('Bạn có chắc muốn xóa biến thể này?');">
-                                                        <input type="hidden" name="variantId" value="@variant.Id" />
-                                                        <input type="hidden" name="productId" value="@Model.Id" />
-                                                        <button type="submit" class="btn btn-danger btn-sm">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            }
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-2 pt-2 border-top">
+                                            <span class="badge @(variant.Status == "active" ? "badge-success" : "badge-secondary")">
+                                                <i class="fas fa-circle mr-1" style="font-size: 0.5rem;"></i>
+                                                @(variant.Status == "active" ? "Hoạt động" : variant.Status)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                     else
                     {
                         <div class="text-center py-5">
-                            <i class="fas fa-cubes fa-3x text-muted mb-3"></i>
-                            <p class="text-muted mb-3">Chưa có biến thể nào.</p>
+                            <div class="mb-4">
+                                <i class="fas fa-cubes fa-4x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted mb-3">Chưa có biến thể nào</h5>
+                            <p class="text-muted mb-4">Thêm biến thể để khách hàng có thể chọn size, màu sắc và các tùy chọn khác.</p>
                             @if (Model.CanAddVariant)
                             {
-                                <a asp-action="AddVariant" asp-route-id="@Model.Id" class="btn btn-primary">
+                                <a asp-action="AddVariant" asp-route-id="@Model.Id" class="btn btn-primary btn-lg">
                                     <i class="fas fa-plus mr-2"></i>Thêm biến thể đầu tiên
                                 </a>
                             }
@@ -186,45 +245,47 @@
 
             <!-- Action Buttons -->
             <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                        <a asp-action="Index" class="btn btn-outline-secondary mb-3 mb-md-0 px-4">
                             <i class="fas fa-arrow-left mr-2"></i>Quay lại danh sách
                         </a>
                         
-                        <div>
+                        <div class="text-center text-md-right">
                             @if (Model.Status == "draft")
                             {
                                 @if (Model.CanSubmit)
                                 {
                                     <form asp-action="Submit" asp-route-id="@Model.Id" method="post" class="d-inline"
                                           onsubmit="return confirm('Bạn có chắc muốn gửi sản phẩm này để duyệt? Sau khi gửi, bạn sẽ không thể chỉnh sửa cho đến khi được duyệt.');">
-                                        <button type="submit" class="btn btn-success">
+                                        <button type="submit" class="btn btn-success btn-lg px-5">
                                             <i class="fas fa-paper-plane mr-2"></i>Gửi duyệt
                                         </button>
                                     </form>
                                 }
                                 else
                                 {
-                                    <button type="button" class="btn btn-success" disabled title="Cần thêm ít nhất 1 biến thể">
-                                        <i class="fas fa-paper-plane mr-2"></i>Gửi duyệt
-                                    </button>
-                                    <small class="text-muted ml-2">
-                                        <i class="fas fa-info-circle"></i> Cần thêm ít nhất 1 biến thể để gửi duyệt
-                                    </small>
+                                    <div>
+                                        <button type="button" class="btn btn-success btn-lg px-5" disabled title="Cần thêm ít nhất 1 biến thể">
+                                            <i class="fas fa-paper-plane mr-2"></i>Gửi duyệt
+                                        </button>
+                                        <p class="text-muted small mt-2 mb-0">
+                                            <i class="fas fa-info-circle mr-1"></i>Cần thêm ít nhất 1 biến thể để gửi duyệt
+                                        </p>
+                                    </div>
                                 }
                             }
                             else if (Model.Status == "pending")
                             {
-                                <span class="text-info">
-                                    <i class="fas fa-clock mr-2"></i>Đang chờ admin duyệt...
-                                </span>
+                                <div class="alert alert-info mb-0 d-inline-block">
+                                    <i class="fas fa-clock mr-2"></i><strong>Đang chờ admin duyệt...</strong>
+                                </div>
                             }
                             else if (Model.Status == "active")
                             {
-                                <span class="text-success">
-                                    <i class="fas fa-check-circle mr-2"></i>Sản phẩm đang được bán
-                                </span>
+                                <div class="alert alert-success mb-0 d-inline-block">
+                                    <i class="fas fa-check-circle mr-2"></i><strong>Sản phẩm đang được bán</strong>
+                                </div>
                             }
                         </div>
                     </div>
@@ -233,3 +294,22 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <style>
+        .variant-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+            background: white !important;
+        }
+
+        .badge-lg {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #D19C97 0%, #c88a84 100%);
+        }
+    </style>
+}
