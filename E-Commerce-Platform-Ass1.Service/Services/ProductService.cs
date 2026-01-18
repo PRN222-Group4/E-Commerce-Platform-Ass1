@@ -44,18 +44,6 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return product;
         }
 
-        public async Task<List<Product>> GetAllProductAsync()
-        {
-            var products = await _productRepository.GetAllAsync();
-            return products.ToList();
-        }
-
-        public async Task<Product?> GetProductWithVariantsAsync(Guid productId)
-        {
-            var product = await _productRepository.GetProductWithVariantsAsync(productId);
-            return product;
-        }
-
         public async Task<ServiceResult<Guid>> CreateProductAsync(CreateProductDto dto)
         {
             // Validate Shop exists
