@@ -268,6 +268,33 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return ServiceResult.Success();
         }
 
+        public async Task<ServiceResult> UnpublishProductAsync(Guid productId, Guid shopId)
+        {
+            var product = await _productRepository.GetByIdAsync(productId);
+            if (product == null)
+            {
+                return ServiceResult.Failure("Sản phẩm không tồn tại.");
+            }
+
+            if (product.ShopId != shopId)
+            {
+                return ServiceResult.Failure("Bạn không có quyền thao tác với sản phẩm này.");
+            }
+
+            if (product.Status != "active")
+            {
+                return ServiceResult.Failure("Chỉ có thể gỡ sản phẩm đang hoạt động.");
+            }
+
+            product.Status = "draft";
+            // Khi về draft, sản phẩm sẽ không hiển thị trên trang chủ nữa
+            // Shop cần edit và submit lại để admin duyệt
+
+            await _productRepository.UpdateAsync(product);
+
+            return ServiceResult.Success();
+        }
+
         private static ProductDto MapToDto(Product product, string? shopName = null)
         {
             return new ProductDto
