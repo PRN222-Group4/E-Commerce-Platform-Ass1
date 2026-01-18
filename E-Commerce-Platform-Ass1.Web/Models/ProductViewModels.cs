@@ -108,13 +108,37 @@ namespace E_Commerce_Platform_Ass1.Web.Models
     public class EditProductViewModel
     {
         public Guid Id { get; set; }
+
+        [Required(ErrorMessage = "Tên sản phẩm là bắt buộc.")]
+        [StringLength(200, ErrorMessage = "Tên sản phẩm không được vượt quá {1} ký tự.")]
+        [Display(Name = "Tên sản phẩm")]
         public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
+
+        [StringLength(2000, ErrorMessage = "Mô tả không được vượt quá {1} ký tự.")]
+        [Display(Name = "Mô tả")]
+        public string? Description { get; set; }
+
+        [Required(ErrorMessage = "Giá sản phẩm là bắt buộc.")]
+        [Range(0, double.MaxValue, ErrorMessage = "Giá phải lớn hơn hoặc bằng 0.")]
+        [Display(Name = "Giá bán (₫)")]
         public decimal BasePrice { get; set; }
+
         public string Status { get; set; } = string.Empty;
-        public string ImageUrl { get; set; } = string.Empty;
+
+        [StringLength(500, ErrorMessage = "URL hình ảnh không được vượt quá {1} ký tự.")]
+        [Display(Name = "Link hình ảnh")]
+        [Url(ErrorMessage = "URL không hợp lệ.")]
+        public string? ImageUrl { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng chọn danh mục.")]
+        [Display(Name = "Danh mục")]
+        public Guid CategoryId { get; set; }
+
         public string? CategoryName { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        // Dropdown list categories
+        public List<SelectListItem> Categories { get; set; } = new();
 
         public List<ProductVariantViewModel> Variants { get; set; } = new();
 

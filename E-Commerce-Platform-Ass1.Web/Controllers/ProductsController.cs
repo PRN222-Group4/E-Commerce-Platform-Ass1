@@ -185,6 +185,8 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             }
 
             var product = result.Data!;
+            var categories = await _productService.GetAllCategoriesAsync();
+            
             var viewModel = new EditProductViewModel
             {
                 Id = product.Id,
@@ -194,7 +196,14 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 Status = product.Status,
                 ImageUrl = product.ImageUrl,
                 CategoryName = product.CategoryName,
+                CategoryId = product.CategoryId,
                 CreatedAt = product.CreatedAt,
+                Categories = categories.Select(c => new SelectListItem 
+                { 
+                    Value = c.Id.ToString(), 
+                    Text = c.Name,
+                    Selected = c.Id == product.CategoryId
+                }).ToList(),
                 Variants = product
                     .Variants.Select(v => new ProductVariantViewModel
                     {
@@ -212,6 +221,102 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             };
 
             return View(viewModel);
+        }
+
+        /// <summary>
+        /// POST /Products/Update/{id} - Cập nhật thông tin sản phẩm
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(Guid id, EditProductViewModel viewModel)
+        {
+            var shop = await GetCurrentUserShopAsync();
+            if (shop == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Validate model
+            if (!ModelState.IsValid)
+            {
+                // Reload categories and variants
+                var categories = await _productService.GetAllCategoriesAsync();
+                viewModel.Categories = categories.Select(c => new SelectListItem 
+                { 
+                    Value = c.Id.ToString(), 
+                    Text = c.Name,
+                    Selected = c.Id == viewModel.CategoryId
+                }).ToList();
+
+                var detailResult = await _productService.GetProductDetailAsync(id, shop.Id);
+                if (detailResult.IsSuccess)
+                {
+                    viewModel.Variants = detailResult.Data!.Variants.Select(v => new ProductVariantViewModel
+                    {
+                        Id = v.Id,
+                        VariantName = v.VariantName,
+                        Price = v.Price,
+                        Size = v.Size,
+                        Color = v.Color,
+                        Stock = v.Stock,
+                        Sku = v.Sku,
+                        Status = v.Status,
+                        ImageUrl = v.ImageUrl,
+                    }).ToList();
+                }
+
+                return View("Edit", viewModel);
+            }
+
+            var dto = new UpdateProductDto
+            {
+                ProductId = id,
+                ShopId = shop.Id,
+                CategoryId = viewModel.CategoryId,
+                Name = viewModel.Name,
+                Description = viewModel.Description ?? string.Empty,
+                BasePrice = viewModel.BasePrice,
+                ImageUrl = viewModel.ImageUrl ?? string.Empty,
+            };
+
+            var result = await _productService.UpdateProductAsync(dto);
+
+            if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+                
+                // Reload data
+                var categories = await _productService.GetAllCategoriesAsync();
+                viewModel.Categories = categories.Select(c => new SelectListItem 
+                { 
+                    Value = c.Id.ToString(), 
+                    Text = c.Name,
+                    Selected = c.Id == viewModel.CategoryId
+                }).ToList();
+
+                var detailResult = await _productService.GetProductDetailAsync(id, shop.Id);
+                if (detailResult.IsSuccess)
+                {
+                    viewModel.Variants = detailResult.Data!.Variants.Select(v => new ProductVariantViewModel
+                    {
+                        Id = v.Id,
+                        VariantName = v.VariantName,
+                        Price = v.Price,
+                        Size = v.Size,
+                        Color = v.Color,
+                        Stock = v.Stock,
+                        Sku = v.Sku,
+                        Status = v.Status,
+                        ImageUrl = v.ImageUrl,
+                    }).ToList();
+                }
+
+                return View("Edit", viewModel);
+            }
+
+            TempData["SuccessMessage"] = "Cập nhật thông tin sản phẩm thành công!";
+            return RedirectToAction("Edit", new { id });
         }
 
         /// <summary>

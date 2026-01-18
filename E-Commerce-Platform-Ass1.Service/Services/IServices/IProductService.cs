@@ -36,6 +36,11 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
         Task<ServiceResult> SubmitProductAsync(Guid productId, Guid shopId);
 
         /// <summary>
+        /// Cập nhật thông tin sản phẩm (chỉ khi ở trạng thái draft)
+        /// </summary>
+        Task<ServiceResult> UpdateProductAsync(UpdateProductDto dto);
+
+        /// <summary>
         /// Lấy tất cả danh mục active
         /// </summary>
         Task<List<CategoryDto>> GetAllCategoriesAsync();

@@ -230,6 +230,44 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return ServiceResult.Success();
         }
 
+        public async Task<ServiceResult> UpdateProductAsync(UpdateProductDto dto)
+        {
+            var product = await _productRepository.GetByIdAsync(dto.ProductId);
+            if (product == null)
+            {
+                return ServiceResult.Failure("Sản phẩm không tồn tại.");
+            }
+
+            if (product.ShopId != dto.ShopId)
+            {
+                return ServiceResult.Failure("Bạn không có quyền cập nhật sản phẩm này.");
+            }
+
+            // Chỉ cho phép cập nhật khi ở trạng thái draft
+            if (product.Status != "draft")
+            {
+                return ServiceResult.Failure("Chỉ có thể cập nhật sản phẩm ở trạng thái bản nháp.");
+            }
+
+            // Validate Category exists
+            var category = await _categoryRepository.GetByIdAsync(dto.CategoryId);
+            if (category == null)
+            {
+                return ServiceResult.Failure("Danh mục không tồn tại.");
+            }
+
+            // Update product information
+            product.Name = dto.Name;
+            product.Description = dto.Description;
+            product.BasePrice = dto.BasePrice;
+            product.ImageUrl = dto.ImageUrl;
+            product.CategoryId = dto.CategoryId;
+
+            await _productRepository.UpdateAsync(product);
+
+            return ServiceResult.Success();
+        }
+
         private static ProductDto MapToDto(Product product, string? shopName = null)
         {
             return new ProductDto
