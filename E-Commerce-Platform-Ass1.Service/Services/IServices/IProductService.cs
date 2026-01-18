@@ -19,6 +19,9 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
 
         Task<ServiceResult<Guid>> CreateProductAsync(CreateProductDto dto);
 
+        Task<List<Product>> GetAllProductAsync();
+
+        Task<Product?> GetProductWithVariantsAsync(Guid productId);
         /// <summary>
         /// Lấy danh sách sản phẩm theo ShopId
         /// </summary>
