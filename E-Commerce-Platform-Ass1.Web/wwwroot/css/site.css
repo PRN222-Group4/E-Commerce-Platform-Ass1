@@ -76,6 +76,15 @@ body {
   overflow: hidden;
 }
 
+/* Ensure dropdown is hidden by default and only shows on click */
+.user-profile-dropdown:not(.show) .user-dropdown-menu {
+  display: none !important;
+}
+
+.user-profile-dropdown.show .user-dropdown-menu {
+  display: block !important;
+}
+
 .user-dropdown-header {
   background: linear-gradient(135deg, #D19C97 0%, #c88a84 100%);
   color: white;
