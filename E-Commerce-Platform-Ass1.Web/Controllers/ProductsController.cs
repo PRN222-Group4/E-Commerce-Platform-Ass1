@@ -95,7 +95,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                         .ToList() ?? new List<ProductListItemViewModel>(),
             };
 
-            return View(viewModel);
+            return View("~/Views/Shop/Products/Index.cshtml", viewModel);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             var viewModel = new CreateProductViewModel();
             await PopulateCategoriesAsync(viewModel);
 
-            return View(viewModel);
+            return View("~/Views/Shop/Products/Create.cshtml", viewModel);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             if (!ModelState.IsValid)
             {
                 await PopulateCategoriesAsync(viewModel);
-                return View(viewModel);
+                return View("~/Views/Shop/Products/Create.cshtml", viewModel);
             }
 
             var dto = new CreateProductDto
@@ -156,7 +156,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     result.ErrorMessage ?? "Không thể tạo sản phẩm."
                 );
                 await PopulateCategoriesAsync(viewModel);
-                return View(viewModel);
+                return View("~/Views/Shop/Products/Create.cshtml", viewModel);
             }
 
             TempData["SuccessMessage"] =
@@ -220,7 +220,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     .ToList(),
             };
 
-            return View(viewModel);
+            return View("~/Views/Shop/Products/Edit.cshtml", viewModel);
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     }).ToList();
                 }
 
-                return View("Edit", viewModel);
+                return View("~/Views/Shop/Products/Edit.cshtml", viewModel);
             }
 
             var dto = new UpdateProductDto
@@ -312,7 +312,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     }).ToList();
                 }
 
-                return View("Edit", viewModel);
+                return View("~/Views/Shop/Products/Edit.cshtml", viewModel);
             }
 
             TempData["SuccessMessage"] = "Cập nhật thông tin sản phẩm thành công!";
@@ -353,7 +353,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 ProductName = product.Name,
             };
 
-            return View(viewModel);
+            return View("~/Views/Shop/Products/AddVariant.cshtml", viewModel);
         }
 
         /// <summary>
@@ -373,7 +373,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             if (!ModelState.IsValid)
             {
                 viewModel.ProductId = id;
-                return View(viewModel);
+                return View("~/Views/Shop/Products/AddVariant.cshtml", viewModel);
             }
 
             var dto = new CreateProductVariantDto
@@ -397,7 +397,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     result.ErrorMessage ?? "Không thể thêm biến thể."
                 );
                 viewModel.ProductId = id;
-                return View(viewModel);
+                return View("~/Views/Shop/Products/AddVariant.cshtml", viewModel);
             }
 
             TempData["SuccessMessage"] = "Thêm biến thể thành công!";
@@ -456,6 +456,34 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             {
                 TempData["SuccessMessage"] =
                     "Đã gửi sản phẩm để duyệt thành công! Vui lòng chờ admin phê duyệt.";
+            }
+
+            return RedirectToAction("Edit", new { id });
+        }
+
+        /// <summary>
+        /// POST /Products/{id}/Unpublish - Gỡ sản phẩm về trạng thái draft
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unpublish(Guid id)
+        {
+            var shop = await GetCurrentUserShopAsync();
+            if (shop == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _productService.UnpublishProductAsync(id, shop.Id);
+
+            if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Đã gỡ sản phẩm thành công! Bạn có thể chỉnh sửa và gửi duyệt lại.";
             }
 
             return RedirectToAction("Edit", new { id });

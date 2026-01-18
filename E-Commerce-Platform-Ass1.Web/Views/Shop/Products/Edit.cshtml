@@ -51,7 +51,7 @@
             @if (Model.Status == "draft")
             {
                 <!-- Edit Form (Only for draft status) -->
-                <div class="card border-0 shadow-sm mb-4">
+                <div class="card border-0 mb-4">
                     <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">
                             <i class="fas fa-edit mr-2"></i>Chỉnh sửa thông tin sản phẩm
@@ -215,7 +215,7 @@
             else
             {
                 <!-- Read-only View (For non-draft status) -->
-                <div class="card border-0 shadow-sm mb-4">
+                <div class="card border-0 mb-4">
                     <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">
                             <i class="fas fa-box mr-2"></i>Thông tin sản phẩm
@@ -230,7 +230,7 @@
                                 <div class="position-relative">
                                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                                     {
-                                        <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded shadow-sm" style="max-height: 300px; width: 100%; object-fit: cover;">
+                                        <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded" style="max-height: 300px; width: 100%; object-fit: cover;">
                                     }
                                     else
                                     {
@@ -299,7 +299,7 @@
             }
 
             <!-- Variants Card -->
-            <div class="card border-0 shadow-sm mb-4">
+            <div class="card border-0 mb-4">
                 <div class="card-header bg-gradient-primary text-white py-3 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #D19C97 0%, #c88a84 100%);">
                     <h5 class="mb-0">
                         <i class="fas fa-cubes mr-2"></i>Biến thể sản phẩm 
@@ -449,7 +449,7 @@
             else
             {
                 <!-- Action Buttons for non-draft status -->
-                <div class="card border-0 shadow-sm mb-4">
+                <div class="card border-0 mb-4">
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-center">
                             <a asp-action="Index" class="btn btn-outline-secondary px-4">
@@ -465,8 +465,16 @@
                                 }
                                 else if (Model.Status == "active")
                                 {
-                                    <div class="alert alert-success mb-0 d-inline-block">
-                                        <i class="fas fa-check-circle mr-2"></i><strong>Sản phẩm đang được bán</strong>
+                                    <div class="d-flex align-items-center">
+                                        <div class="alert alert-success mb-0 mr-3 py-2 px-3">
+                                            <i class="fas fa-check-circle mr-2"></i><strong>Đang bán</strong>
+                                        </div>
+                                        <form asp-action="Unpublish" asp-route-id="@Model.Id" method="post" 
+                                              onsubmit="return confirm('Bạn có chắc muốn gỡ sản phẩm này? Sản phẩm sẽ chuyển về bản nháp và không còn hiển thị với khách hàng.');">
+                                            <button type="submit" class="btn btn-warning">
+                                                <i class="fas fa-eye-slash mr-2"></i>Gỡ để chỉnh sửa
+                                            </button>
+                                        </form>
                                     </div>
                                 }
                             </div>
@@ -481,11 +489,7 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <style>
-        .variant-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
-            background: white !important;
-        }
+        /* .variant-card:hover removed for flat design */
 
         .badge-lg {
             font-size: 0.9rem;
@@ -694,4 +698,12 @@
             });
         });
     </script>
+    <style>
+        .card, .card:hover, .variant-card, .variant-card:hover {
+            box-shadow: none !important;
+            transform: none !important;
+            transition: none !important;
+            border: 1px solid #f0f0f0 !important;
+        }
+    </style>
 }
