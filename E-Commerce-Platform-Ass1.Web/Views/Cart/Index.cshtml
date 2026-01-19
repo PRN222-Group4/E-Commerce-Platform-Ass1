@@ -179,7 +179,7 @@
                                 <h6 class="font-weight-bold text-primary mb-0 price-text">@item.TotalLinePrice.ToString("N0") VNĐ</h6>
                             </div>
                             <div class="col-md-1 col-1 text-right mt-3 mt-md-0">
-                                <i class="fa fa-times-circle remove-btn" title="Xóa sản phẩm"></i>
+                                <i class="fa fa-times-circle remove-btn" title="Xóa sản phẩm" data-id="@item.CartItemId"></i>
                             </div>
                         </div>
                     </div>
@@ -232,6 +232,42 @@
                     }
                 }
                 input.val(newVal);
+            });
+
+            $('.remove-btn').on('click', function () {
+                var btn = $(this);
+                var cartItemId = btn.data('id');
+                var card = btn.closest('.cart-item-card');
+
+                if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')) {
+                    $.ajax({
+                        url: '/CartItem/' + cartItemId,
+                        type: 'DELETE',
+                        success: function (result) {
+                            if (result.success) {
+                                card.fadeOut(300, function () {
+                                    $(this).remove();
+                                    
+                                    // Update total price
+                                    $('.summary-card .text-primary').text(result.newCartTotal.toLocaleString('en-US') + ' VNĐ');
+                                    
+                                    // Update item count in header
+                                    $('h4.font-weight-bold.text-dark:contains("Sản phẩm")').text('Sản phẩm (' + result.newItemCount + ')');
+
+                                    // Check if cart is empty
+                                    if (result.newItemCount === 0) {
+                                        location.reload(); // Simplest way to show the "empty cart" message
+                                    }
+                                });
+                            } else {
+                                alert(result.message || 'Có lỗi xảy ra khi xóa sản phẩm.');
+                            }
+                        },
+                        error: function () {
+                            alert('Không thể kết nối tới máy chủ. Vui lòng thử lại sau.');
+                        }
+                    });
+                }
             });
         });
     </script>
