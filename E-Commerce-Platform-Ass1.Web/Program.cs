@@ -1,14 +1,12 @@
 using E_Commerce_Platform_Ass1.Data.Database;
-<<<<<<< Updated upstream
+using E_Commerce_Platform_Ass1.Data.Momo;
 using E_Commerce_Platform_Ass1.Service.Common.Configurations;
 using E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions;
-=======
 using E_Commerce_Platform_Ass1.Data.Momo;
 using E_Commerce_Platform_Ass1.Data.Repositories;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
 using E_Commerce_Platform_Ass1.Service.Services;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
->>>>>>> Stashed changes
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,12 +32,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-<<<<<<< Updated upstream
 // Configure Cloudinary
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 
 builder.Services.AddService();
-=======
+
 // DI for repositories & services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
@@ -50,7 +47,6 @@ builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IMomoService, MomoService>();
->>>>>>> Stashed changes
 
 var app = builder.Build();
 
