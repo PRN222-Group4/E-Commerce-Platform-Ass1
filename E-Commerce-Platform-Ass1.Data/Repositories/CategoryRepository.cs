@@ -18,6 +18,7 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
         {
             _context = context;
         }
+
         public async Task<Category> AddAsync(Category category)
         {
             _context.Categories.Add(category);
@@ -49,9 +50,7 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
 
         public async Task<IEnumerable<Category>> GetByStatus(string status)
         {
-            return await _context.Categories
-                .Where(c => c.Status == status)
-                .ToListAsync();
+            return await _context.Categories.Where(c => c.Status == status).ToListAsync();
         }
 
         public async Task<Category> UpdateAsync(Category category)
