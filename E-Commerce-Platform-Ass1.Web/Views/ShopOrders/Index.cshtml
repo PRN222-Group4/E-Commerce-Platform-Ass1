@@ -103,7 +103,7 @@
                 <a asp-action="Index" asp-route-status="Confirmed" class="btn @(currentStatus == "Confirmed" ? "btn-info" : "btn-outline-info")">
                     <i class="fas fa-check"></i> Đã xác nhận
                 </a>
-                <a asp-action="Index" asp-route-status="Processing" class="btn @(currentStatus == "Processing" ? "btn-primary" : "btn-outline-primary")">
+                <a asp-action="Index" asp-route-status="Shipped" class="btn @(currentStatus == "Shipped" ? "btn-primary" : "btn-outline-primary")">
                     <i class="fas fa-shipping-fast"></i> Đang giao
                 </a>
                 <a asp-action="Index" asp-route-status="Completed" class="btn @(currentStatus == "Completed" ? "btn-success" : "btn-outline-success")">
@@ -159,8 +159,11 @@
                                             case "Confirmed":
                                                 <span class="badge badge-info">Đã xác nhận</span>
                                                 break;
-                                            case "Processing":
+                                            case "Shipped":
                                                 <span class="badge badge-primary">Đang giao</span>
+                                                break;
+                                            case "Processing":
+                                                <span class="badge badge-primary">Đang xử lý</span>
                                                 break;
                                             case "Completed":
                                                 <span class="badge badge-success">Hoàn thành</span>

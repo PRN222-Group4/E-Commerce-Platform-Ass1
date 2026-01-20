@@ -158,6 +158,64 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return ServiceResult.Success();
         }
 
+        /// <summary>
+        /// Gửi hàng - Tạo shipment và chuyển trạng thái đơn hàng sang Shipped
+        /// </summary>
+        public async Task<ServiceResult> ShipOrderAsync(
+            Guid orderId,
+            Guid shopId,
+            CreateShipmentDto dto
+        )
+        {
+            var order = await _orderRepository.GetByIdWithDetailsAsync(orderId);
+            if (order == null)
+            {
+                return ServiceResult.Failure("Đơn hàng không tồn tại.");
+            }
+
+            // Kiểm tra quyền
+            var hasShopItem = order.OrderItems.Any(oi =>
+                oi.ProductVariant?.Product?.ShopId == shopId
+            );
+            if (!hasShopItem)
+            {
+                return ServiceResult.Failure("Đơn hàng không thuộc shop của bạn.");
+            }
+
+            if (order.Status != "Confirmed")
+            {
+                return ServiceResult.Failure("Chỉ có thể gửi hàng cho đơn hàng đã xác nhận.");
+            }
+
+            // Validate input
+            if (string.IsNullOrWhiteSpace(dto.Carrier))
+            {
+                return ServiceResult.Failure("Vui lòng chọn đơn vị vận chuyển.");
+            }
+            if (string.IsNullOrWhiteSpace(dto.TrackingCode))
+            {
+                return ServiceResult.Failure("Vui lòng nhập mã vận đơn.");
+            }
+
+            // Tạo shipment
+            var shipment = new Shipment
+            {
+                Id = Guid.NewGuid(),
+                OrderId = orderId,
+                Carrier = dto.Carrier,
+                TrackingCode = dto.TrackingCode,
+                Status = "Shipping",
+                UpdatedAt = DateTime.Now,
+            };
+            await _shipmentRepository.AddAsync(shipment);
+
+            // Cập nhật order status
+            order.Status = "Shipped";
+            await _orderRepository.UpdateAsync(order);
+
+            return ServiceResult.Success();
+        }
+
         public async Task<ServiceResult> UpdateShipmentAsync(
             Guid orderId,
             Guid shopId,
@@ -232,6 +290,14 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return ServiceResult.Failure("Đơn hàng không thuộc shop của bạn.");
             }
 
+            // Kiểm tra trạng thái - chỉ cho phép khi đang shipped
+            if (order.Status != "Shipped" && order.Status != "Processing")
+            {
+                return ServiceResult.Failure(
+                    "Chỉ có thể đánh dấu giao hàng cho đơn hàng đang vận chuyển."
+                );
+            }
+
             // Cập nhật order
             order.Status = "Completed";
             await _orderRepository.UpdateAsync(order);
@@ -286,7 +352,9 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 TotalOrders = orderList.Count,
                 PendingOrders = orderList.Count(o => o.Status == "Pending"),
                 ConfirmedOrders = orderList.Count(o => o.Status == "Confirmed"),
-                ShippingOrders = orderList.Count(o => o.Status == "Processing"),
+                ShippingOrders = orderList.Count(o =>
+                    o.Status == "Shipped" || o.Status == "Processing"
+                ),
                 DeliveredOrders = orderList.Count(o => o.Status == "Completed"),
                 CancelledOrders = orderList.Count(o => o.Status == "Cancelled"),
                 TotalRevenue = orderList

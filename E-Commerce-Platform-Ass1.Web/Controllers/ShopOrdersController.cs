@@ -125,6 +125,34 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         }
 
         /// <summary>
+        /// POST /ShopOrders/Ship/{id} - Gửi hàng (tạo shipment)
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Ship(Guid id, CreateShipmentDto dto)
+        {
+            var shopId = await GetCurrentShopIdAsync();
+            if (shopId == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index");
+            }
+
+            var result = await _shopOrderService.ShipOrderAsync(id, shopId.Value, dto);
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] =
+                    "Đã gửi hàng thành công! Đơn hàng đang được vận chuyển.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+            }
+
+            return RedirectToAction("Detail", new { id });
+        }
+
+        /// <summary>
         /// POST /ShopOrders/UpdateShipment/{id} - Cập nhật trạng thái vận chuyển
         /// </summary>
         [HttpPost]
