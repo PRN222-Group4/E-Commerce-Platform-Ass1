@@ -1,0 +1,98 @@
+﻿@model PagedResult<OrderHistoryViewModel>
+
+@{
+    ViewData["Title"] = "Lịch sử đơn hàng";
+}
+
+<h3 class="mb-4 text-center">📦 Lịch sử đơn hàng</h3>
+
+@if (!Model.Items.Any())
+{
+        <div class="alert alert-info">
+            Bạn chưa có đơn hàng nào.
+        </div>
+}
+else
+{
+        <div class="order-history-list">
+        @foreach (var item in Model.Items)
+        {
+                    <div class="card mb-3 shadow-sm border-0">
+                        <div class="card-body">
+
+                            <!-- Header -->
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold">
+                                   🕒 <strong>Thời gian:</strong> @item.OrderDate.ToString("dd/MM/yyyy HH:mm")
+                                </span>
+
+                                <span class="badge 
+                            @(item.Status == "PAID" ? "bg-success" :
+                              item.Status == "PENDING" ? "bg-warning text-dark" :
+                              "bg-secondary")">
+                            @item.Status
+                                </span>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="mb-2 text-muted">
+                                📍 <strong>Địa chỉ:</strong> @item.ShippingAddress
+                            </div>
+
+                            <!-- Total -->
+                            <div class="mb-3">
+                                💰 <strong>Tổng tiền:</strong>
+                                <span class="text-danger fw-bold">
+                            @item.TotalAmount.ToString("N0") đ
+                                </span>
+                            </div>
+
+                            <!-- Action -->
+                            <div class="text-end">
+                                <a asp-controller="Order"
+                                   asp-action="Detail"
+                                   asp-route-orderId="@item.OrderId"
+                                   class="btn btn-sm btn-primary">
+                                    Xem chi tiết
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+        }
+        </div>
+
+            <!-- PAGINATION -->
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="History"
+                       asp-route-page="@(Model.CurrentPage - 1)">
+                        ‹
+                    </a>
+                </li>
+
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link"
+                               asp-action="History"
+                               asp-route-page="@i">
+                        @i
+                            </a>
+                        </li>
+            }
+
+                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="History"
+                       asp-route-page="@(Model.CurrentPage + 1)">
+                        ›
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+}

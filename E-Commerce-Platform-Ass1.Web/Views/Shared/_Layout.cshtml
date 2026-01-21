@@ -25,11 +25,13 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark"
+                               asp-controller="Home"
+                               asp-action="Index">
+                                <i class="fas fa-home"></i> Trang chủ
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
@@ -40,25 +42,136 @@
                         }
                         @if (User?.Identity?.IsAuthenticated ?? false)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Products" asp-action="Index">
-                                    <i class="fas fa-box"></i> Quản lý sản phẩm
-                                </a>
-                            </li>
+                                <!-- CUSTOMER -->
+                            @if (User.IsInRole("Customer"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark"
+                                       asp-controller="Cart"
+                                       asp-action="Index">
+                                        <i class="fas fa-shopping-cart"></i> Giỏ hàng
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark"
+                                       asp-controller="Order"
+                                       asp-action="History">
+                                        <i class="fas fa-history"></i> Lịch sử đơn hàng
+                                    </a>
+                                </li>
+                            }
+
+                                <!-- SELLER -->
+                            @if (User.IsInRole("Seller"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark"
+                                       asp-controller="Products"
+                                       asp-action="Index">
+                                        <i class="fas fa-box"></i> Quản lý sản phẩm
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark"
+                                       asp-controller="Order"
+                                       asp-action="SellerOrders">
+                                        <i class="fas fa-receipt"></i> Đơn hàng của shop
+                                    </a>
+                                </li>
+                            }
                         }
                     </ul>
                     <ul class="navbar-nav">
                         @if (User?.Identity?.IsAuthenticated ?? false)
                         {
-                            <li class="nav-item">
-                                <span class="navbar-text me-2">
-                                    Xin chào, @User.Identity!.Name
-                                </span>
-                            </li>
-                            <li class="nav-item">
-                                <form asp-controller="Authentication" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-link nav-link text-dark">Đăng xuất</button>
-                                </form>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center"
+                                   href="#"
+                                   id="userDropdown"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+
+                                    <i class="fas fa-user-circle me-1"></i>
+                                                        @User.Identity!.Name
+                                </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end shadow"
+                                    aria-labelledby="userDropdown"
+                                    style="min-width: 260px;">
+
+                                    <!-- HEADER -->
+                                    <li class="px-3 py-3 text-white"
+                                        style="background:#d8a39d; border-radius:6px 6px 0 0;">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-circle fa-2x me-2"></i>
+                                            <div>
+                                                <div class="fw-bold">@User.Identity!.Name</div>
+                                                <small>@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</small>
+                                            </div>
+                                        </div>
+                                    </li>
+
+                                    <!-- MENU -->
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fas fa-user me-2"></i>Hồ sơ của tôi
+                                        </a>
+                                    </li>
+
+                                    <!-- CUSTOMER -->
+                                                        @if (User.IsInRole("Customer"))
+                                                        {
+                                            <li>
+                                                <a class="dropdown-item"
+                                                   asp-controller="Shop"
+                                                   asp-action="RegisterShop">
+                                                    <i class="fas fa-store me-2"></i>Đăng ký shop
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="dropdown-item"
+                                                   asp-controller="Order"
+                                                   asp-action="History">
+                                                    <i class="fas fa-history me-2"></i>Lịch sử đơn hàng
+                                                </a>
+                                            </li>
+                                                        }
+
+                                    <!-- SELLER -->
+                                        @if (User.IsInRole("Seller"))
+                                        {
+                                            <li>
+                                                <a class="dropdown-item"
+                                                   asp-controller="Products"
+                                                   asp-action="Index">
+                                                    <i class="fas fa-box me-2"></i>Đơn hàng
+                                                </a>
+                                            </li>
+                                        }
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fas fa-cog me-2"></i>Cài đặt
+                                        </a>
+                                    </li>
+
+                                    <li><hr class="dropdown-divider"></li>
+
+                                    <!-- LOGOUT -->
+                                    <li>
+                                        <form asp-controller="Authentication"
+                                              asp-action="Logout"
+                                              method="post">
+                                            <button type="submit"
+                                                    class="dropdown-item text-danger">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else
