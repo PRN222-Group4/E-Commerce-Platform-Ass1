@@ -24,6 +24,11 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
         Task<ServiceResult> ConfirmOrderAsync(Guid orderId, Guid shopId);
 
         /// <summary>
+        /// Gửi hàng - Tạo shipment và chuyển trạng thái sang Shipped
+        /// </summary>
+        Task<ServiceResult> ShipOrderAsync(Guid orderId, Guid shopId, CreateShipmentDto dto);
+
+        /// <summary>
         /// Cập nhật trạng thái vận chuyển
         /// </summary>
         Task<ServiceResult> UpdateShipmentAsync(Guid orderId, Guid shopId, UpdateShipmentDto dto);

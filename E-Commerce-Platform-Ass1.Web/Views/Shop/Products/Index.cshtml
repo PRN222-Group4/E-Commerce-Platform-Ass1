@@ -1,7 +1,7 @@
 @model E_Commerce_Platform_Ass1.Web.Models.ProductListViewModel
 @{
     ViewData["Title"] = "Quản lý sản phẩm";
-    Layout = "~/Views/Shared/_EShopperLayout.cshtml";
+    Layout = "~/Views/Shared/_ShopDashboardLayout.cshtml";
 }
 
 <div class="container-fluid pt-5">
@@ -23,7 +23,7 @@
             <!-- Stats Cards -->
             <div class="row mb-4">
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm">
+                    <div class="card border-0">
                         <div class="card-body text-center py-4">
                             <h3 class="font-weight-bold text-primary mb-0">@Model.TotalProducts</h3>
                             <small class="text-muted">Tổng sản phẩm</small>
@@ -31,7 +31,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm">
+                    <div class="card border-0">
                         <div class="card-body text-center py-4">
                             <h3 class="font-weight-bold text-success mb-0">@Model.ActiveCount</h3>
                             <small class="text-muted">Đang bán</small>
@@ -39,7 +39,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card border-0 shadow-sm">
+                    <div class="card border-0">
                         <div class="card-body text-center py-4">
                             <h3 class="font-weight-bold text-secondary mb-0">@Model.InactiveCount</h3>
                             <small class="text-muted">Ngừng bán</small>
@@ -67,7 +67,7 @@
             <!-- Products Table -->
             @if (Model.Products.Any())
             {
-                <div class="card border-0 shadow-sm">
+                <div class="card border-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <thead class="bg-light">
@@ -117,7 +117,7 @@
                                         </td>
                                         <td class="align-middle">@item.CreatedAt.ToString("dd/MM/yyyy")</td>
                                         <td class="align-middle">
-                                            <a href="#" class="btn btn-sm btn-outline-primary" title="Chỉnh sửa">
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Chỉnh sửa">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </td>

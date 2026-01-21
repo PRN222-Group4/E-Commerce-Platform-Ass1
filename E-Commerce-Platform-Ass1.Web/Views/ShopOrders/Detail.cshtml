@@ -54,8 +54,11 @@
                         case "Confirmed":
                             <span class="badge badge-info px-3 py-2">Đã xác nhận</span>
                             break;
+                        case "Shipped":
+                            <span class="badge badge-primary px-3 py-2">Đang giao hàng</span>
+                            break;
                         case "Processing":
-                            <span class="badge badge-primary px-3 py-2">Đang giao</span>
+                            <span class="badge badge-primary px-3 py-2">Đang xử lý</span>
                             break;
                         case "Completed":
                             <span class="badge badge-success px-3 py-2">Hoàn thành</span>
@@ -144,7 +147,37 @@
                             </button>
                         </form>
                     }
-                    else if (Model.Status == "Confirmed" || Model.Status == "Processing")
+                    else if (Model.Status == "Confirmed")
+                    {
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle mr-2"></i>Đơn hàng đã xác nhận. Vui lòng nhập thông tin vận chuyển để gửi hàng.
+                        </div>
+                        <form asp-action="Ship" asp-route-id="@Model.Id" method="post">
+                            <div class="form-group">
+                                <label class="font-weight-bold"><i class="fas fa-truck mr-2"></i>Đơn vị vận chuyển <span class="text-danger">*</span></label>
+                                <select name="Carrier" class="form-control" required>
+                                    <option value="">-- Chọn đơn vị --</option>
+                                    <option value="Giao Hàng Nhanh">Giao Hàng Nhanh (GHN)</option>
+                                    <option value="Giao Hàng Tiết Kiệm">Giao Hàng Tiết Kiệm (GHTK)</option>
+                                    <option value="Vietnam Post">Vietnam Post (VNPost)</option>
+                                    <option value="J&T Express">J&T Express</option>
+                                    <option value="Shopee Express">Shopee Express</option>
+                                    <option value="Viettel Post">Viettel Post</option>
+                                    <option value="Ninja Van">Ninja Van</option>
+                                    <option value="Best Express">Best Express</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold"><i class="fas fa-barcode mr-2"></i>Mã vận đơn <span class="text-danger">*</span></label>
+                                <input type="text" name="TrackingCode" class="form-control" placeholder="VD: GHN123456789" required>
+                                <small class="form-text text-muted">Nhập mã vận đơn từ đơn vị vận chuyển</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-shipping-fast mr-2"></i>Gửi hàng
+                            </button>
+                        </form>
+                    }
+                    else if (Model.Status == "Shipped" || Model.Status == "Processing")
                     {
                         <form asp-action="MarkDelivered" asp-route-id="@Model.Id" method="post">
                             <button type="submit" class="btn btn-success btn-block" onclick="return confirm('Xác nhận đã giao hàng thành công?')">
@@ -170,7 +203,7 @@
             </div>
 
             <!-- Shipment Info -->
-            @if (Model.Status == "Confirmed" || Model.Status == "Processing" || Model.Status == "Completed")
+            @if (Model.Status == "Shipped" || Model.Status == "Processing" || Model.Status == "Completed")
             {
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-light py-3">
@@ -181,77 +214,100 @@
                         {
                             <div class="mb-3">
                                 <small class="text-muted">Đơn vị vận chuyển</small>
-                                <p class="mb-0 font-weight-bold">@Model.Shipment.Carrier</p>
+                                <p class="mb-0 font-weight-bold">
+                                    <i class="fas fa-truck text-primary mr-2"></i>@Model.Shipment.Carrier
+                                </p>
                             </div>
                             <div class="mb-3">
                                 <small class="text-muted">Mã vận đơn</small>
-                                <p class="mb-0"><code class="font-weight-bold">@Model.Shipment.TrackingCode</code></p>
+                                <p class="mb-0">
+                                    <code class="font-weight-bold bg-light px-2 py-1 rounded">@Model.Shipment.TrackingCode</code>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary ml-2" onclick="copyToClipboard('@Model.Shipment.TrackingCode')" title="Sao chép">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </p>
                             </div>
                             <div class="mb-3">
-                                <small class="text-muted">Trạng thái</small>
+                                <small class="text-muted">Trạng thái vận chuyển</small>
                                 <p class="mb-0">
                                     @switch (Model.Shipment.Status)
                                     {
-                                        case "Pending":
-                                            <span class="badge badge-warning">Chờ lấy hàng</span>
+                                        case "Shipping":
+                                            <span class="badge badge-info px-3 py-2">
+                                                <i class="fas fa-truck mr-1"></i>Đang vận chuyển
+                                            </span>
                                             break;
                                         case "In Transit":
-                                            <span class="badge badge-info">Đang vận chuyển</span>
+                                            <span class="badge badge-info px-3 py-2">
+                                                <i class="fas fa-route mr-1"></i>Đang trên đường
+                                            </span>
                                             break;
                                         case "Delivered":
-                                            <span class="badge badge-success">Đã giao hàng</span>
+                                            <span class="badge badge-success px-3 py-2">
+                                                <i class="fas fa-check-circle mr-1"></i>Đã giao hàng
+                                            </span>
+                                            break;
+                                        case "Pending":
+                                            <span class="badge badge-warning px-3 py-2">
+                                                <i class="fas fa-clock mr-1"></i>Chờ lấy hàng
+                                            </span>
                                             break;
                                         default:
-                                            <span class="badge badge-secondary">@Model.Shipment.Status</span>
+                                            <span class="badge badge-secondary px-3 py-2">@Model.Shipment.Status</span>
                                             break;
                                     }
                                 </p>
                             </div>
+                            <div class="mb-0">
+                                <small class="text-muted">Cập nhật lúc</small>
+                                <p class="mb-0">
+                                    <i class="fas fa-clock text-muted mr-1"></i>@Model.Shipment.UpdatedAt.ToString("dd/MM/yyyy HH:mm")
+                                </p>
+                            </div>
+
+                            @if (Model.Status == "Shipped" || Model.Status == "Processing")
+                            {
+                                <hr>
+                                <h6 class="mb-3"><i class="fas fa-edit mr-2"></i>Cập nhật vận chuyển</h6>
+                                <form asp-action="UpdateShipment" asp-route-id="@Model.Id" method="post">
+                                    <div class="form-group">
+                                        <label class="small">Đơn vị vận chuyển</label>
+                                        <select name="Carrier" class="form-control form-control-sm" required id="carrierSelect">
+                                            <option value="Giao Hàng Nhanh">Giao Hàng Nhanh</option>
+                                            <option value="Giao Hàng Tiết Kiệm">Giao Hàng Tiết Kiệm</option>
+                                            <option value="Vietnam Post">Vietnam Post</option>
+                                            <option value="J&T Express">J&T Express</option>
+                                            <option value="Shopee Express">Shopee Express</option>
+                                            <option value="Viettel Post">Viettel Post</option>
+                                            <option value="Ninja Van">Ninja Van</option>
+                                            <option value="Best Express">Best Express</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="small">Mã vận đơn</label>
+                                        <input type="text" name="TrackingCode" class="form-control form-control-sm" 
+                                               value="@Model.Shipment.TrackingCode" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="small">Trạng thái</label>
+                                        <select name="Status" class="form-control form-control-sm" required id="statusSelect">
+                                            <option value="Shipping">Đang vận chuyển</option>
+                                            <option value="In Transit">Đang trên đường</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-sm btn-primary btn-block">
+                                        <i class="fas fa-save mr-1"></i>Cập nhật
+                                    </button>
+                                </form>
+                                <script>
+                                    document.getElementById('carrierSelect').value = '@Model.Shipment.Carrier';
+                                    document.getElementById('statusSelect').value = '@Model.Shipment.Status';
+                                </script>
+                            }
                         }
                         else
                         {
-                            <p class="text-muted mb-3">Chưa có thông tin vận chuyển</p>
-                        }
-
-                        @if (Model.Status != "Completed" && Model.Status != "Cancelled")
-                        {
-                            var currentCarrier = Model.Shipment?.Carrier ?? "";
-                            var currentShipmentStatus = Model.Shipment?.Status ?? "";
-                            <hr>
-                            <h6 class="mb-3">Cập nhật vận chuyển</h6>
-                            <form asp-action="UpdateShipment" asp-route-id="@Model.Id" method="post">
-                                <div class="form-group">
-                                    <label>Đơn vị vận chuyển</label>
-                                    <select name="Carrier" class="form-control" required id="carrierSelect">
-                                        <option value="">-- Chọn --</option>
-                                        <option value="Giao Hàng Nhanh">Giao Hàng Nhanh</option>
-                                        <option value="Giao Hàng Tiết Kiệm">Giao Hàng Tiết Kiệm</option>
-                                        <option value="Vietnam Post">Vietnam Post</option>
-                                        <option value="J&T Express">J&T Express</option>
-                                        <option value="Shopee Express">Shopee Express</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Mã vận đơn</label>
-                                    <input type="text" name="TrackingCode" class="form-control" 
-                                           value="@Model.Shipment?.TrackingCode" 
-                                           placeholder="Nhập mã vận đơn" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Trạng thái</label>
-                                    <select name="Status" class="form-control" required id="statusSelect">
-                                        <option value="Pending">Chờ lấy hàng</option>
-                                        <option value="In Transit">Đang vận chuyển</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-primary btn-block">
-                                    <i class="fas fa-save mr-2"></i>Cập nhật
-                                </button>
-                            </form>
-                            <script>
-                                document.getElementById('carrierSelect').value = '@currentCarrier';
-                                document.getElementById('statusSelect').value = '@currentShipmentStatus';
-                            </script>
+                            <p class="text-muted mb-0">Chưa có thông tin vận chuyển</p>
                         }
                     </div>
                 </div>
@@ -297,3 +353,15 @@
         </div>
     </div>
 </div>
+@section Scripts {
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show toast or alert
+                alert('Đã sao chép mã vận đơn: ' + text);
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
+}

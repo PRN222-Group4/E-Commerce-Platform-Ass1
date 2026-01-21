@@ -1,12 +1,9 @@
 using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
-using E_Commerce_Platform_Ass1.Service.Services.IServices;
 using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Models;
+using E_Commerce_Platform_Ass1.Service.Services.IServices;
 
-
-
-       
 namespace E_Commerce_Platform_Ass1.Service.Services
 {
     /// <summary>
@@ -125,12 +122,20 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         }
 
         /// <summary>
-        /// Lấy tất cả danh mục
+        /// Lấy tất cả danh mục đang hoạt động (Active) - dùng cho dropdown khi tạo sản phẩm
         /// </summary>
         public async Task<List<CategoryDto>> GetAllCategoriesAsync()
         {
             var categories = await _categoryRepository.GetAllAsync();
-            return categories.Select(c => new CategoryDto { Id = c.Id, Name = c.Name }).ToList();
+            return categories
+                .Where(c => c.Status == "Active")
+                .Select(c => new CategoryDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Status = c.Status,
+                })
+                .ToList();
         }
 
         /// <summary>
@@ -262,6 +267,33 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             product.BasePrice = dto.BasePrice;
             product.ImageUrl = dto.ImageUrl;
             product.CategoryId = dto.CategoryId;
+
+            await _productRepository.UpdateAsync(product);
+
+            return ServiceResult.Success();
+        }
+
+        public async Task<ServiceResult> UnpublishProductAsync(Guid productId, Guid shopId)
+        {
+            var product = await _productRepository.GetByIdAsync(productId);
+            if (product == null)
+            {
+                return ServiceResult.Failure("Sản phẩm không tồn tại.");
+            }
+
+            if (product.ShopId != shopId)
+            {
+                return ServiceResult.Failure("Bạn không có quyền thao tác với sản phẩm này.");
+            }
+
+            if (product.Status != "active")
+            {
+                return ServiceResult.Failure("Chỉ có thể gỡ sản phẩm đang hoạt động.");
+            }
+
+            product.Status = "draft";
+            // Khi về draft, sản phẩm sẽ không hiển thị trên trang chủ nữa
+            // Shop cần edit và submit lại để admin duyệt
 
             await _productRepository.UpdateAsync(product);
 

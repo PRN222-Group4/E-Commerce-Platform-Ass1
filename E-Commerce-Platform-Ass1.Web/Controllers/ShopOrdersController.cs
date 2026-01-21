@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
 using E_Commerce_Platform_Ass1.Service.DTOs;
+using E_Commerce_Platform_Ass1.Service.Services;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,14 +15,12 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
     public class ShopOrdersController : Controller
     {
         private readonly IShopOrderService _shopOrderService;
-        private readonly IShopRepository _shopRepository;
+        private readonly IShopService _shopService;
 
-        public ShopOrdersController(
-            IShopOrderService shopOrderService,
-            IShopRepository shopRepository)
+        public ShopOrdersController(IShopOrderService shopOrderService, IShopService shopService)
         {
             _shopOrderService = shopOrderService;
-            _shopRepository = shopRepository;
+            _shopService = shopService;
         }
 
         /// <summary>
@@ -35,7 +34,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return null;
             }
 
-            var shop = await _shopRepository.GetByUserIdAsync(userId);
+            var shop = await _shopService.GetShopByUserIdAsync(userId);
             return shop?.Id;
         }
 
@@ -116,6 +115,34 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             if (result.IsSuccess)
             {
                 TempData["SuccessMessage"] = "Đã xác nhận đơn hàng thành công!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+            }
+
+            return RedirectToAction("Detail", new { id });
+        }
+
+        /// <summary>
+        /// POST /ShopOrders/Ship/{id} - Gửi hàng (tạo shipment)
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Ship(Guid id, CreateShipmentDto dto)
+        {
+            var shopId = await GetCurrentShopIdAsync();
+            if (shopId == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index");
+            }
+
+            var result = await _shopOrderService.ShipOrderAsync(id, shopId.Value, dto);
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] =
+                    "Đã gửi hàng thành công! Đơn hàng đang được vận chuyển.";
             }
             else
             {

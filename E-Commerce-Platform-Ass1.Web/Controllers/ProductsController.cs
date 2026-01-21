@@ -17,17 +17,17 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
     {
         private readonly IProductService _productService;
         private readonly IProductVariantService _productVariantService;
-        private readonly IShopRepository _shopRepository;
+        private readonly IShopService _shopService;
 
         public ProductsController(
             IProductService productService,
             IProductVariantService productVariantService,
-            IShopRepository shopRepository
+            IShopService shopService
         )
         {
             _productService = productService;
             _productVariantService = productVariantService;
-            _shopRepository = shopRepository;
+            _shopService = shopService;
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             var userId = GetCurrentUserId();
             if (userId == Guid.Empty)
                 return null;
-            return await _shopRepository.GetByUserIdAsync(userId);
+            return await _shopService.GetShopByUserIdAsync(userId);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                         .ToList() ?? new List<ProductListItemViewModel>(),
             };
 
-            return View(viewModel);
+            return View("~/Views/Shop/Products/Index.cshtml", viewModel);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             var viewModel = new CreateProductViewModel();
             await PopulateCategoriesAsync(viewModel);
 
-            return View(viewModel);
+            return View("~/Views/Shop/Products/Create.cshtml", viewModel);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             if (!ModelState.IsValid)
             {
                 await PopulateCategoriesAsync(viewModel);
-                return View(viewModel);
+                return View("~/Views/Shop/Products/Create.cshtml", viewModel);
             }
 
             var dto = new CreateProductDto
@@ -156,7 +156,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     result.ErrorMessage ?? "Không thể tạo sản phẩm."
                 );
                 await PopulateCategoriesAsync(viewModel);
-                return View(viewModel);
+                return View("~/Views/Shop/Products/Create.cshtml", viewModel);
             }
 
             TempData["SuccessMessage"] =
@@ -186,7 +186,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
 
             var product = result.Data!;
             var categories = await _productService.GetAllCategoriesAsync();
-            
+
             var viewModel = new EditProductViewModel
             {
                 Id = product.Id,
@@ -198,12 +198,14 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 CategoryName = product.CategoryName,
                 CategoryId = product.CategoryId,
                 CreatedAt = product.CreatedAt,
-                Categories = categories.Select(c => new SelectListItem 
-                { 
-                    Value = c.Id.ToString(), 
-                    Text = c.Name,
-                    Selected = c.Id == product.CategoryId
-                }).ToList(),
+                Categories = categories
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = c.Name,
+                        Selected = c.Id == product.CategoryId,
+                    })
+                    .ToList(),
                 Variants = product
                     .Variants.Select(v => new ProductVariantViewModel
                     {
@@ -220,7 +222,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     .ToList(),
             };
 
-            return View(viewModel);
+            return View("~/Views/Shop/Products/Edit.cshtml", viewModel);
         }
 
         /// <summary>
@@ -242,31 +244,35 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             {
                 // Reload categories and variants
                 var categories = await _productService.GetAllCategoriesAsync();
-                viewModel.Categories = categories.Select(c => new SelectListItem 
-                { 
-                    Value = c.Id.ToString(), 
-                    Text = c.Name,
-                    Selected = c.Id == viewModel.CategoryId
-                }).ToList();
+                viewModel.Categories = categories
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = c.Name,
+                        Selected = c.Id == viewModel.CategoryId,
+                    })
+                    .ToList();
 
                 var detailResult = await _productService.GetProductDetailAsync(id, shop.Id);
                 if (detailResult.IsSuccess)
                 {
-                    viewModel.Variants = detailResult.Data!.Variants.Select(v => new ProductVariantViewModel
-                    {
-                        Id = v.Id,
-                        VariantName = v.VariantName,
-                        Price = v.Price,
-                        Size = v.Size,
-                        Color = v.Color,
-                        Stock = v.Stock,
-                        Sku = v.Sku,
-                        Status = v.Status,
-                        ImageUrl = v.ImageUrl,
-                    }).ToList();
+                    viewModel.Variants = detailResult
+                        .Data!.Variants.Select(v => new ProductVariantViewModel
+                        {
+                            Id = v.Id,
+                            VariantName = v.VariantName,
+                            Price = v.Price,
+                            Size = v.Size,
+                            Color = v.Color,
+                            Stock = v.Stock,
+                            Sku = v.Sku,
+                            Status = v.Status,
+                            ImageUrl = v.ImageUrl,
+                        })
+                        .ToList();
                 }
 
-                return View("Edit", viewModel);
+                return View("~/Views/Shop/Products/Edit.cshtml", viewModel);
             }
 
             var dto = new UpdateProductDto
@@ -285,34 +291,38 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             if (!result.IsSuccess)
             {
                 TempData["ErrorMessage"] = result.ErrorMessage;
-                
+
                 // Reload data
                 var categories = await _productService.GetAllCategoriesAsync();
-                viewModel.Categories = categories.Select(c => new SelectListItem 
-                { 
-                    Value = c.Id.ToString(), 
-                    Text = c.Name,
-                    Selected = c.Id == viewModel.CategoryId
-                }).ToList();
+                viewModel.Categories = categories
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = c.Name,
+                        Selected = c.Id == viewModel.CategoryId,
+                    })
+                    .ToList();
 
                 var detailResult = await _productService.GetProductDetailAsync(id, shop.Id);
                 if (detailResult.IsSuccess)
                 {
-                    viewModel.Variants = detailResult.Data!.Variants.Select(v => new ProductVariantViewModel
-                    {
-                        Id = v.Id,
-                        VariantName = v.VariantName,
-                        Price = v.Price,
-                        Size = v.Size,
-                        Color = v.Color,
-                        Stock = v.Stock,
-                        Sku = v.Sku,
-                        Status = v.Status,
-                        ImageUrl = v.ImageUrl,
-                    }).ToList();
+                    viewModel.Variants = detailResult
+                        .Data!.Variants.Select(v => new ProductVariantViewModel
+                        {
+                            Id = v.Id,
+                            VariantName = v.VariantName,
+                            Price = v.Price,
+                            Size = v.Size,
+                            Color = v.Color,
+                            Stock = v.Stock,
+                            Sku = v.Sku,
+                            Status = v.Status,
+                            ImageUrl = v.ImageUrl,
+                        })
+                        .ToList();
                 }
 
-                return View("Edit", viewModel);
+                return View("~/Views/Shop/Products/Edit.cshtml", viewModel);
             }
 
             TempData["SuccessMessage"] = "Cập nhật thông tin sản phẩm thành công!";
@@ -353,7 +363,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 ProductName = product.Name,
             };
 
-            return View(viewModel);
+            return View("~/Views/Shop/Products/AddVariant.cshtml", viewModel);
         }
 
         /// <summary>
@@ -373,7 +383,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             if (!ModelState.IsValid)
             {
                 viewModel.ProductId = id;
-                return View(viewModel);
+                return View("~/Views/Shop/Products/AddVariant.cshtml", viewModel);
             }
 
             var dto = new CreateProductVariantDto
@@ -397,7 +407,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     result.ErrorMessage ?? "Không thể thêm biến thể."
                 );
                 viewModel.ProductId = id;
-                return View(viewModel);
+                return View("~/Views/Shop/Products/AddVariant.cshtml", viewModel);
             }
 
             TempData["SuccessMessage"] = "Thêm biến thể thành công!";
@@ -456,6 +466,35 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             {
                 TempData["SuccessMessage"] =
                     "Đã gửi sản phẩm để duyệt thành công! Vui lòng chờ admin phê duyệt.";
+            }
+
+            return RedirectToAction("Edit", new { id });
+        }
+
+        /// <summary>
+        /// POST /Products/{id}/Unpublish - Gỡ sản phẩm về trạng thái draft
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unpublish(Guid id)
+        {
+            var shop = await GetCurrentUserShopAsync();
+            if (shop == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _productService.UnpublishProductAsync(id, shop.Id);
+
+            if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+            }
+            else
+            {
+                TempData["SuccessMessage"] =
+                    "Đã gỡ sản phẩm thành công! Bạn có thể chỉnh sửa và gửi duyệt lại.";
             }
 
             return RedirectToAction("Edit", new { id });
