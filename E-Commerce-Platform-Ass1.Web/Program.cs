@@ -57,6 +57,8 @@ builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IMomoService, MomoService>();
 builder.Services.AddScoped<ICheckoutService, CheckoutService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 var app = builder.Build();
 
