@@ -14,7 +14,7 @@ namespace E_Commerce_Platform_Ass1.Service.DTOs
         public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public int ItemCount { get; set; }
-        
+
         // Thông tin vận chuyển
         public string? Carrier { get; set; }
         public string? TrackingCode { get; set; }
@@ -71,6 +71,15 @@ namespace E_Commerce_Platform_Ass1.Service.DTOs
         public string TrackingCode { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public DateTime UpdatedAt { get; set; }
+    }
+
+    /// <summary>
+    /// DTO tạo shipment khi gửi hàng
+    /// </summary>
+    public class CreateShipmentDto
+    {
+        public string Carrier { get; set; } = string.Empty;
+        public string TrackingCode { get; set; } = string.Empty;
     }
 
     /// <summary>

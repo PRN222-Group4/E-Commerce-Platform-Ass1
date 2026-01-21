@@ -41,6 +41,11 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
         Task<ServiceResult> UpdateProductAsync(UpdateProductDto dto);
 
         /// <summary>
+        /// Gỡ sản phẩm (chuyển từ active về draft để chỉnh sửa)
+        /// </summary>
+        Task<ServiceResult> UnpublishProductAsync(Guid productId, Guid shopId);
+
+        /// <summary>
         /// Lấy tất cả danh mục active
         /// </summary>
         Task<List<CategoryDto>> GetAllCategoriesAsync();

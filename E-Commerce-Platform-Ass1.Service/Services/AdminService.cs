@@ -423,13 +423,17 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         public async Task<ServiceResult<List<CategoryDto>>> GetAllCategoriesAsync()
         {
             var categories = await _categoryRepository.GetAllAsync();
-            var categoryDtos = categories.Select(c => new CategoryDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Status = c.Status,
-                ProductCount = c.Products?.Count ?? 0
-            }).ToList();
+            var allProducts = await _productRepository.GetAllAsync();
+
+            var categoryDtos = categories
+                .Select(c => new CategoryDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Status = c.Status,
+                    ProductCount = allProducts.Count(p => p.CategoryId == c.Id),
+                })
+                .ToList();
 
             return ServiceResult<List<CategoryDto>>.Success(categoryDtos);
         }
@@ -442,12 +446,13 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return ServiceResult<CategoryDto>.Failure("Danh mục không tồn tại.");
             }
 
+            var allProducts = await _productRepository.GetAllAsync();
             var dto = new CategoryDto
             {
                 Id = category.Id,
                 Name = category.Name,
                 Status = category.Status,
-                ProductCount = category.Products?.Count ?? 0
+                ProductCount = allProducts.Count(p => p.CategoryId == category.Id),
             };
 
             return ServiceResult<CategoryDto>.Success(dto);
@@ -471,7 +476,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             {
                 Id = Guid.NewGuid(),
                 Name = dto.Name.Trim(),
-                Status = dto.Status ?? "Active"
+                Status = dto.Status ?? "Active",
             };
 
             await _categoryRepository.AddAsync(category);
@@ -519,7 +524,9 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             var products = await _productRepository.GetByCategoryIdAsync(categoryId);
             if (products.Any())
             {
-                return ServiceResult.Failure($"Không thể xóa danh mục đang có {products.Count()} sản phẩm.");
+                return ServiceResult.Failure(
+                    $"Không thể xóa danh mục đang có {products.Count()} sản phẩm."
+                );
             }
 
             await _categoryRepository.DeleteAsync(category);
