@@ -60,7 +60,7 @@ namespace E_Commerce_Platform_Ass1.Service.DTOs
         public int TotalQuantitySold { get; set; }
         public decimal TotalRevenue { get; set; }
         public int OrderCount { get; set; }
-        
+
         // Thống kê tuần này
         public int WeeklyQuantitySold { get; set; }
         public decimal WeeklyRevenue { get; set; }

@@ -16,7 +16,8 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         public ShopService(
             IShopRepository shopRepository,
             IOrderRepository orderRepository,
-            IProductRepository productRepository)
+            IProductRepository productRepository
+        )
         {
             _shopRepository = shopRepository;
             _orderRepository = orderRepository;
@@ -68,7 +69,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
 
             // Lấy tất cả đơn hàng của shop
             var orders = (await _orderRepository.GetByShopIdAsync(shopId)).ToList();
-            
+
             // Lấy tất cả sản phẩm của shop
             var products = (await _productRepository.GetByShopIdAsync(shopId)).ToList();
 
@@ -105,16 +106,24 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 // Thống kê tuần này
                 WeeklyOrders = orders.Count(o => o.CreatedAt >= startOfWeek),
                 WeeklyRevenue = orders
-                    .Where(o => o.CreatedAt >= startOfWeek && completedStatuses.Contains(o.Status?.ToLower() ?? ""))
+                    .Where(o =>
+                        o.CreatedAt >= startOfWeek
+                        && completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                    )
                     .Sum(o => o.TotalAmount),
-                WeeklyCompletedOrders = orders
-                    .Count(o => o.CreatedAt >= startOfWeek && completedStatuses.Contains(o.Status?.ToLower() ?? "")),
-                WeeklyCancelledOrders = orders
-                    .Count(o => o.CreatedAt >= startOfWeek && cancelledStatuses.Contains(o.Status?.ToLower() ?? "")),
-                WeeklyPendingOrders = orders
-                    .Count(o => o.CreatedAt >= startOfWeek && 
-                           !completedStatuses.Contains(o.Status?.ToLower() ?? "") && 
-                           !cancelledStatuses.Contains(o.Status?.ToLower() ?? "")),
+                WeeklyCompletedOrders = orders.Count(o =>
+                    o.CreatedAt >= startOfWeek
+                    && completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                ),
+                WeeklyCancelledOrders = orders.Count(o =>
+                    o.CreatedAt >= startOfWeek
+                    && cancelledStatuses.Contains(o.Status?.ToLower() ?? "")
+                ),
+                WeeklyPendingOrders = orders.Count(o =>
+                    o.CreatedAt >= startOfWeek
+                    && !completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                    && !cancelledStatuses.Contains(o.Status?.ToLower() ?? "")
+                ),
                 WeeklyProductsSold = orders
                     .Where(o => o.CreatedAt >= startOfWeek)
                     .SelectMany(o => o.OrderItems)
@@ -124,16 +133,24 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 // Thống kê tháng này
                 MonthlyOrders = orders.Count(o => o.CreatedAt >= startOfMonth),
                 MonthlyRevenue = orders
-                    .Where(o => o.CreatedAt >= startOfMonth && completedStatuses.Contains(o.Status?.ToLower() ?? ""))
+                    .Where(o =>
+                        o.CreatedAt >= startOfMonth
+                        && completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                    )
                     .Sum(o => o.TotalAmount),
-                MonthlyCompletedOrders = orders
-                    .Count(o => o.CreatedAt >= startOfMonth && completedStatuses.Contains(o.Status?.ToLower() ?? "")),
-                MonthlyCancelledOrders = orders
-                    .Count(o => o.CreatedAt >= startOfMonth && cancelledStatuses.Contains(o.Status?.ToLower() ?? "")),
-                MonthlyPendingOrders = orders
-                    .Count(o => o.CreatedAt >= startOfMonth && 
-                           !completedStatuses.Contains(o.Status?.ToLower() ?? "") && 
-                           !cancelledStatuses.Contains(o.Status?.ToLower() ?? "")),
+                MonthlyCompletedOrders = orders.Count(o =>
+                    o.CreatedAt >= startOfMonth
+                    && completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                ),
+                MonthlyCancelledOrders = orders.Count(o =>
+                    o.CreatedAt >= startOfMonth
+                    && cancelledStatuses.Contains(o.Status?.ToLower() ?? "")
+                ),
+                MonthlyPendingOrders = orders.Count(o =>
+                    o.CreatedAt >= startOfMonth
+                    && !completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                    && !cancelledStatuses.Contains(o.Status?.ToLower() ?? "")
+                ),
                 MonthlyProductsSold = orders
                     .Where(o => o.CreatedAt >= startOfMonth)
                     .SelectMany(o => o.OrderItems)
@@ -144,7 +161,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 DailySales = new List<DailySalesDto>(),
                 TopSellingProducts = new List<ProductRevenueDto>(),
                 ProductRevenues = new List<ProductRevenueDto>(),
-                RecentOrders = new List<RecentOrderDto>()
+                RecentOrders = new List<RecentOrderDto>(),
             };
 
             // Daily Sales for last 7 days (for chart)
@@ -152,20 +169,22 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             {
                 var date = now.AddDays(-i).Date;
                 var dayOrders = orders.Where(o => o.CreatedAt.Date == date).ToList();
-                dto.DailySales.Add(new DailySalesDto
-                {
-                    Date = date,
-                    DateLabel = date.ToString("dd/MM"),
-                    OrderCount = dayOrders.Count,
-                    Revenue = dayOrders
-                        .Where(o => completedStatuses.Contains(o.Status?.ToLower() ?? ""))
-                        .Sum(o => o.TotalAmount)
-                });
+                dto.DailySales.Add(
+                    new DailySalesDto
+                    {
+                        Date = date,
+                        DateLabel = date.ToString("dd/MM"),
+                        OrderCount = dayOrders.Count,
+                        Revenue = dayOrders
+                            .Where(o => completedStatuses.Contains(o.Status?.ToLower() ?? ""))
+                            .Sum(o => o.TotalAmount),
+                    }
+                );
             }
 
             // Product Revenues - Thống kê doanh thu theo từng sản phẩm
             var productStats = new Dictionary<Guid, ProductRevenueDto>();
-            
+
             foreach (var product in products)
             {
                 var productOrderItems = orders
@@ -196,34 +215,36 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                     WeeklyQuantitySold = weeklyItems.Sum(oi => oi.Quantity),
                     WeeklyRevenue = weeklyItems.Sum(oi => oi.Price * oi.Quantity),
                     MonthlyQuantitySold = monthlyItems.Sum(oi => oi.Quantity),
-                    MonthlyRevenue = monthlyItems.Sum(oi => oi.Price * oi.Quantity)
+                    MonthlyRevenue = monthlyItems.Sum(oi => oi.Price * oi.Quantity),
                 };
             }
 
             // Top selling products (by quantity)
-            dto.TopSellingProducts = productStats.Values
-                .OrderByDescending(p => p.TotalQuantitySold)
+            dto.TopSellingProducts = productStats
+                .Values.OrderByDescending(p => p.TotalQuantitySold)
                 .Take(5)
                 .ToList();
 
             // All product revenues (sorted by revenue)
-            dto.ProductRevenues = productStats.Values
-                .OrderByDescending(p => p.TotalRevenue)
+            dto.ProductRevenues = productStats
+                .Values.OrderByDescending(p => p.TotalRevenue)
                 .ToList();
 
             // Recent orders (last 5)
             var recentOrders = orders.Take(5);
             foreach (var order in recentOrders)
             {
-                dto.RecentOrders.Add(new RecentOrderDto
-                {
-                    Id = order.Id,
-                    OrderCode = order.Id.ToString().Substring(0, 8).ToUpper(),
-                    CustomerName = order.User?.Name ?? "N/A",
-                    TotalAmount = order.TotalAmount,
-                    Status = order.Status ?? "Unknown",
-                    CreatedAt = order.CreatedAt
-                });
+                dto.RecentOrders.Add(
+                    new RecentOrderDto
+                    {
+                        Id = order.Id,
+                        OrderCode = order.Id.ToString().Substring(0, 8).ToUpper(),
+                        CustomerName = order.User?.Name ?? "N/A",
+                        TotalAmount = order.TotalAmount,
+                        Status = order.Status ?? "Unknown",
+                        CreatedAt = order.CreatedAt,
+                    }
+                );
             }
 
             return dto;
