@@ -61,6 +61,15 @@ else
                             <!-- Action -->
                             <div class="d-flex justify-content-end gap-2">
 
+                                @if (item.Status == "CANCELLED")
+                                {
+                                    <form asp-controller="Order" asp-action="Reorder" asp-route-orderId="@item.OrderId" method="post">
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            🛒 Mua lại
+                                        </button>
+                                    </form>
+                                }
+
                                 <a asp-controller="Order"
                                    asp-action="Detail"
                                    asp-route-orderId="@item.OrderId"
