@@ -4,146 +4,350 @@
     ViewData["Title"] = "Lịch sử đơn hàng";
 }
 
-<h3 class="mb-4 text-center">📦 Lịch sử đơn hàng</h3>
-@if (TempData["Success"] != null)
-{
-        <div id="successAlert"
-             class="alert alert-success alert-dismissible fade show"
-             role="alert">
-            ✅ @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-}
+<style>
+    .page-container {
+        background-color: #EDF1FF;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
 
+    .order-history-header {
+        background: linear-gradient(135deg, #D19C97 0%, #c88a84 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(209, 156, 151, 0.3);
+    }
 
-@if (!Model.Items.Any())
-{
-        <div class="alert alert-info">
-            Bạn chưa có đơn hàng nào.
+    .order-table-header {
+        background: white;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #3D464D;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .order-row {
+        background: white;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+        border-left: 3px solid #D19C97;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .order-row:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(209, 156, 151, 0.2);
+    }
+
+    .order-cell {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+
+    .order-total {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #000000;
+    }
+
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: inline-block;
+        min-width: 130px;
+        text-align: center;
+        color: white !important;
+    }
+
+    .action-btn {
+        padding: 0.5rem 0.85rem;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+        width: 110px;
+    }
+
+    .btn-detail {
+        background: #6c63ff;
+        color: white;
+    }
+
+    .btn-detail:hover {
+        background: #5a52e0;
+        transform: scale(1.05);
+        box-shadow: 0 3px 10px rgba(108, 99, 255, 0.4);
+        color: white;
+    }
+
+    .btn-reorder {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-reorder:hover {
+        background: #218838;
+        transform: scale(1.05);
+        box-shadow: 0 3px 10px rgba(40, 167, 69, 0.4);
+        color: white;
+    }
+
+    .btn-refund {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-refund:hover {
+        background: #c82333;
+        transform: scale(1.05);
+        box-shadow: 0 3px 10px rgba(220, 53, 69, 0.4);
+        color: white;
+    }
+
+    /* Modern Pagination */
+    .modern-pagination {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modern-pagination .page-item {
+        list-style: none;
+    }
+
+    .modern-pagination .page-link {
+        border: 1px solid #D19C97;
+        background: white;
+        color: #3D464D;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        min-width: 40px;
+        text-align: center;
+    }
+
+    .modern-pagination .page-link:hover {
+        background: #D19C97;
+        color: white;
+        border-color: #D19C97;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(209, 156, 151, 0.3);
+    }
+
+    .modern-pagination .page-item.active .page-link {
+        background: #D19C97;
+        border-color: #D19C97;
+        color: white;
+        box-shadow: 0 4px 12px rgba(209, 156, 151, 0.4);
+    }
+
+    .modern-pagination .page-item.disabled .page-link {
+        background: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+        box-shadow: none;
+        border-color: #e9ecef;
+    }
+
+    .modern-pagination .page-item.disabled .page-link:hover {
+        transform: none;
+        background: #e9ecef;
+        color: #6c757d;
+    }
+</style>
+
+<div class="page-container">
+    <div class="container-fluid px-4">
+        <div class="order-history-header text-center">
+            <h2 class="mb-1"><i class="fas fa-shopping-bag me-2"></i>Lịch sử đơn hàng</h2>
+            <p class="mb-0 opacity-75">Quản lý và theo dõi tất cả đơn hàng của bạn</p>
         </div>
-}
-else
-{
-        <div class="order-history-list">
-        @foreach (var item in Model.Items)
+
+        @if (TempData["Success"] != null)
         {
-                    <div class="card mb-3 shadow-sm border-0">
-                        <div class="card-body">
+            <div id="successAlert"
+                 class="alert alert-success alert-dismissible fade show"
+                 role="alert">
+                <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
 
-                            <!-- Header -->
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold">
-                                   🕒 <strong>Thời gian:</strong> @item.OrderDate.ToString("dd/MM/yyyy HH:mm")
-                                </span>
+        @if (!Model.Items.Any())
+        {
+            <div class="alert alert-info border-0 shadow-sm text-center py-5">
+                <i class="fas fa-box-open fa-3x mb-3 text-muted"></i>
+                <p class="mb-0">Bạn chưa có đơn hàng nào.</p>
+            </div>
+        }
+        else
+        {
+            <!-- Table Header -->
+            <div class="order-table-header">
+                <div class="row align-items-center">
+                    <div class="col-2 text-center"><i class="fas fa-calendar me-1"></i>Ngày đặt</div>
+                    <div class="col-1 text-center"><i class="fas fa-hashtag me-1"></i>Mã ĐH</div>
+                    <div class="col-2 text-center"><i class="fas fa-info-circle me-1"></i>Trạng thái</div>
+                    <div class="col-2 text-center"><i class="fas fa-map-marker-alt me-1"></i>Địa chỉ</div>
+                    <div class="col-2 text-center"><i class="fas fa-money-bill-wave me-1"></i>Tổng tiền</div>
+                    <div class="col-3 text-center"><i class="fas fa-cog me-1"></i>Thao tác</div>
+                </div>
+            </div>
 
-                                <span class="badge 
-                            @(item.Status == "PAID" ? "bg-success" :
-                              item.Status == "PENDING" ? "bg-warning text-dark" :
-                              item.Status == "CANCELLED" ? "bg-danger" :
-                              "bg-secondary")">
-                            @item.Status
+            <!-- Order Rows -->
+            <div class="order-list">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="order-row">
+                        <div class="row align-items-center">
+                            <!-- Date -->
+                            <div class="col-2 text-center order-cell" style="justify-content: center;">
+                                <div class="w-100">
+                                    <div>@item.OrderDate.ToString("dd/MM/yyyy")</div>
+                                    <small class="text-muted">@item.OrderDate.ToString("HH:mm")</small>
+                                </div>
+                            </div>
+
+                            <!-- Order ID -->
+                            <div class="col-1 text-center order-cell" style="justify-content: center;">
+                                <strong>#@item.OrderId.ToString().Substring(0, 5)</strong>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-2 text-center order-cell" style="justify-content: center;">
+                                <span class="status-badge 
+                                    @(item.Status == "PAID" ? "bg-success" :
+                                      item.Status == "PENDING" ? "bg-warning text-dark" :
+                                      item.Status == "CANCELLED" ? "bg-danger" :
+                                      "bg-secondary")">
+                                    @(item.Status == "PAID" ? "✓ Đã thanh toán" :
+                                      item.Status == "PENDING" ? "⏳ Chờ xử lý" :
+                                      item.Status == "CANCELLED" ? "✗ Đã hủy" :
+                                      item.Status)
                                 </span>
                             </div>
 
                             <!-- Address -->
-                            <div class="mb-2 text-muted">
-                                📍 <strong>Địa chỉ:</strong> @item.ShippingAddress
+                            <div class="col-2 order-cell" style="justify-content: center;">
+                                <div class="text-truncate text-center w-100" title="@item.ShippingAddress">
+                                    @item.ShippingAddress
+                                </div>
                             </div>
 
                             <!-- Total -->
-                            <div class="mb-3">
-                                💰 <strong>Tổng tiền:</strong>
-                                <span class="text-danger fw-bold">
-                            @item.TotalAmount.ToString("N0") đ
-                                </span>
+                            <div class="col-2 text-center order-cell" style="justify-content: center;">
+                                <div class="order-total">@item.TotalAmount.ToString("N0") đ</div>
                             </div>
 
-                            <!-- Action -->
-                            <div class="d-flex justify-content-end gap-2">
+                            <!-- Actions -->
+                            <div class="col-3 order-cell" style="justify-content: center;">
+                                <div class="d-flex gap-2 justify-content-center flex-nowrap">
+                                    <a asp-controller="Order"
+                                       asp-action="Detail"
+                                       asp-route-orderId="@item.OrderId"
+                                       class="action-btn btn-detail"
+                                       title="Xem chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Chi tiết</span>
+                                    </a>
 
-                                @if (item.Status == "CANCELLED")
-                                {
-                                    <form asp-controller="Order" asp-action="Reorder" asp-route-orderId="@item.OrderId" method="post">
-                                        <button type="submit" class="btn btn-sm btn-outline-success">
-                                            🛒 Mua lại
+                                    @if (item.Status == "CANCELLED")
+                                    {
+                                        <form asp-controller="Order" asp-action="Reorder" asp-route-orderId="@item.OrderId" method="post" class="d-inline">
+                                            <button type="submit" class="action-btn btn-reorder" title="Mua lại">
+                                                <i class="fas fa-redo"></i>
+                                                <span>Mua lại</span>
+                                            </button>
+                                        </form>
+                                    }
+
+                                    @if (item.Status == "PAID" && !item.IsRefunded)
+                                    {
+                                        <button class="action-btn btn-refund"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#refundModal"
+                                                data-order-id="@item.OrderId"
+                                                data-amount="@item.TotalAmount"
+                                                title="Hoàn tiền">
+                                            <i class="fas fa-undo"></i>
+                                            <span>Hoàn tiền</span>
                                         </button>
-                                    </form>
-                                }
-
-                                <a asp-controller="Order"
-                                   asp-action="Detail"
-                                   asp-route-orderId="@item.OrderId"
-                                   class="btn btn-sm btn-primary">
-                                    Xem chi tiết
-                                </a>
-
-                                            @if (item.Status == "PAID" && !item.IsRefunded)
-                                            {
-                                                <button class="btn btn-sm btn-danger"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#refundModal"
-                                                        data-order-id="@item.OrderId"
-                                                        data-amount="@item.TotalAmount">
-                                                    Hoàn tiền
-                                                </button>
-                                            }
+                                    }
+                                </div>
                             </div>
-
                         </div>
                     </div>
-        }
-        </div>
+                }
+            </div>
 
-            <!-- PAGINATION -->
-        <nav class="mt-4">
-            <ul class="pagination justify-content-center">
+            <!-- Modern Pagination -->
+            <nav class="mt-4 pb-5">
+                <ul class="modern-pagination">
+                    <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                        <a class="page-link"
+                           asp-action="History"
+                           asp-route-page="@(Model.CurrentPage - 1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
 
-                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                    <a class="page-link"
-                       asp-action="History"
-                       asp-route-page="@(Model.CurrentPage - 1)">
-                        ‹
-                    </a>
-                </li>
-
-            @for (int i = 1; i <= Model.TotalPages; i++)
-            {
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
                         <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
                             <a class="page-link"
                                asp-action="History"
-                               asp-route-page="@i">
-                        @i
-                            </a>
+                               asp-route-page="@i">@i</a>
                         </li>
-            }
+                    }
 
-                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                    <a class="page-link"
-                       asp-action="History"
-                       asp-route-page="@(Model.CurrentPage + 1)">
-                        ›
-                    </a>
-                </li>
+                    <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link"
+                           asp-action="History"
+                           asp-route-page="@(Model.CurrentPage + 1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+</div>
 
-            </ul>
-        </nav>
-}
-
-                               <!-- Refund Modal -->
+<!-- Refund Modal -->
 <div class="modal fade" id="refundModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <form asp-controller="Refund" asp-action="Refund" method="post" class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title">Xác nhận hoàn tiền</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header" style="background: linear-gradient(135deg, #D19C97 0%, #c88a84 100%); color: white;">
+                <h5 class="modal-title"><i class="fas fa-undo me-2"></i>Xác nhận hoàn tiền</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
                 <input type="hidden" name="orderId" id="refundOrderId" />
 
                 <div class="mb-3">
-                    <label class="form-label">Số tiền hoàn</label>
+                    <label class="form-label fw-bold"><i class="fas fa-money-bill-wave me-2"></i>Số tiền hoàn</label>
                     <input type="number"
                            class="form-control"
                            name="amount"
@@ -152,23 +356,27 @@ else
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Lý do hoàn tiền</label>
+                    <label class="form-label fw-bold"><i class="fas fa-comment-dots me-2"></i>Lý do hoàn tiền</label>
                     <textarea class="form-control"
                               name="reason"
+                              rows="3"
+                              placeholder="Vui lòng nhập lý do hoàn tiền..."
                               required></textarea>
                 </div>
 
-                <div class="alert alert-warning small">
-                    ⚠️ Sau khi hoàn tiền, đơn hàng sẽ bị hủy.
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Sau khi hoàn tiền, đơn hàng sẽ bị hủy.
                 </div>
             </div>
 
             <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Hủy
+                </button>
                 <button type="submit" class="btn btn-danger">
-                    Xác nhận hoàn tiền
+                    <i class="fas fa-check me-1"></i>Xác nhận hoàn tiền
                 </button>
             </div>
-
         </form>
     </div>
 </div>
@@ -179,7 +387,6 @@ else
 
     refundModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
-
         const orderId = button.getAttribute('data-order-id');
         const amount = button.getAttribute('data-amount');
 
@@ -187,13 +394,13 @@ else
         document.getElementById('refundAmount').value = amount;
     });
 
-        // ===== AUTO HIDE SUCCESS ALERT =====
-        setTimeout(() => {
-            const alertNode = document.getElementById('successAlert');
-            if (alertNode) {
-                const bsAlert = new bootstrap.Alert(alertNode);
-                bsAlert.close();
-            }
-        }, 3000);
+    // Auto hide success alert
+    setTimeout(() => {
+        const alertNode = document.getElementById('successAlert');
+        if (alertNode) {
+            const bsAlert = new bootstrap.Alert(alertNode);
+            bsAlert.close();
+        }
+    }, 3000);
 </script>
 }
