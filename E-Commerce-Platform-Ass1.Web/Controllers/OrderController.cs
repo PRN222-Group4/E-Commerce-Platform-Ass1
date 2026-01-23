@@ -9,10 +9,39 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
     public class OrderController : Controller
     {
         private readonly IOrderService _orderService;
+        private readonly ICartService _cartService;
 
-        public OrderController(IOrderService orderService)
+        public OrderController(IOrderService orderService, ICartService cartService)
         {
             _orderService = orderService;
+            _cartService = cartService;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Reorder(Guid orderId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return RedirectToAction("Login", "Authentication");
+            }
+
+            var order = await _orderService.GetOrderItemAsync(orderId);
+            if (order != null && order.Status == "CANCELLED")
+            {
+                foreach (var item in order.OrderItems)
+                {
+                    await _cartService.AddToCart(userId, item.ProductVariantId, item.Quantity);
+                }
+                TempData["Success"] = "Đã thêm các sản phẩm từ đơn hàng cũ vào giỏ hàng của bạn!";
+            }
+            else
+            {
+                TempData["Error"] = "Không thể thực hiện mua lại cho đơn hàng này.";
+                return RedirectToAction("History");
+            }
+
+            return RedirectToAction("Index", "Cart");
         }
 
         [HttpGet]

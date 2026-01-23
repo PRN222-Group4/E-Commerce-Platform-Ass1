@@ -62,6 +62,8 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IRefundRepository, RefundRepository>();
 builder.Services.AddScoped<IRefundService, RefundService>();
 builder.Services.AddScoped<IMomoApi, MomoApi>();
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<IWalletService, WalletService>();
 
 
 var app = builder.Build();

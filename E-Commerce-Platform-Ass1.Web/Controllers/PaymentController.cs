@@ -9,11 +9,13 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
     {
         private readonly IMomoService _momoService;
         private readonly ICartService _cartService;
+        private readonly IWalletService _walletService;
 
-        public PaymentController(IMomoService momoService, ICartService cartService)
+        public PaymentController(IMomoService momoService, ICartService cartService, IWalletService walletService)
         {
             _momoService = momoService;
             _cartService = cartService;
+            _walletService = walletService;
         }
 
         [HttpPost]
@@ -40,10 +42,6 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return RedirectToAction("Index", "Cart");
             }
 
-            // ✅ Lưu vào Session
-            HttpContext.Session.SetString("ShippingAddress", shippingAddress);
-            HttpContext.Session.SetString("SelectedCartItemIds", selectedCartItemIds);
-
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var cart = await _cartService.GetCartUserAsync(userId);
@@ -54,25 +52,67 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return RedirectToAction("Index", "Cart");
             }
 
-            long amount = (long)totalAmount;
-
-            if (amount <= 0)
+            if (totalAmount <= 0)
             {
                 TempData["Error"] = "Số tiền không hợp lệ";
                 return RedirectToAction("Index", "Cart");
             }
 
-            var payUrl = await _momoService.CreatePaymentAsync(
-                amount,
-                "Thanh toán đơn hàng");
+            // ✅ Lấy số dư ví của người dùng
+            var walletDto = await _walletService.GetOrCreateAsync(userId);
+            decimal walletBalance = walletDto?.Balance ?? 0;
 
-            if (string.IsNullOrEmpty(payUrl))
+            decimal walletUsed = 0;
+            decimal momoAmount = 0;
+
+            // ✅ Logic thanh toán hybrid
+            if (walletBalance >= totalAmount)
             {
-                TempData["Error"] = "Thanh toán MoMo thất bại";
-                return RedirectToAction("Index", "Cart");
+                // Trường hợp 1: Ví đủ tiền → chỉ dùng ví
+                walletUsed = totalAmount;
+                momoAmount = 0;
+            }
+            else
+            {
+                // Trường hợp 2: Ví không đủ → dùng hết ví + Momo cho phần còn lại
+                walletUsed = walletBalance;
+                momoAmount = totalAmount - walletBalance;
             }
 
-            return Redirect(payUrl);
+            // ✅ Lưu vào Session
+            HttpContext.Session.SetString("ShippingAddress", shippingAddress);
+            HttpContext.Session.SetString("SelectedCartItemIds", selectedCartItemIds);
+            HttpContext.Session.SetString("WalletUsed", walletUsed.ToString());
+            HttpContext.Session.SetString("MomoAmount", momoAmount.ToString());
+
+            // ✅ Nếu cần thanh toán qua Momo
+            if (momoAmount > 0)
+            {
+                long amount = (long)momoAmount;
+
+                var payUrl = await _momoService.CreatePaymentAsync(
+                    amount,
+                    "Thanh toán đơn hàng");
+
+                if (string.IsNullOrEmpty(payUrl))
+                {
+                    TempData["Error"] = "Thanh toán MoMo thất bại";
+                    return RedirectToAction("Index", "Cart");
+                }
+
+                return Redirect(payUrl);
+            }
+            else
+            {
+                // ✅ Nếu chỉ dùng ví (không cần Momo) → chuyển thẳng đến callback
+                return RedirectToAction("PaymentCallBack", "Checkout", new
+                {
+                    resultCode = 0,
+                    message = "Thanh toán bằng ví thành công",
+                    orderId = Guid.NewGuid().ToString(),
+                    transId = ""
+                });
+            }
         }
 
         [HttpGet]

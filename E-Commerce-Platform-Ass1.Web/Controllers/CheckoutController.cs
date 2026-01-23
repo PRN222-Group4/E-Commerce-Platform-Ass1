@@ -19,8 +19,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
 
         [HttpGet]
         public async Task<IActionResult> PaymentCallBack(
-            int resultCode,
-            string message)
+            int resultCode)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -36,14 +35,18 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
 
             if (resultCode == 0)
             {
-                // ✅ LẤY ĐỊA CHỈ TỪ SESSION
                 var shippingAddress = HttpContext.Session.GetString("ShippingAddress");
                 var selectedIdsStr = HttpContext.Session.GetString("SelectedCartItemIds");
 
-                if (string.IsNullOrEmpty(shippingAddress) || string.IsNullOrEmpty(selectedIdsStr))
+                var walletUsedStr = HttpContext.Session.GetString("WalletUsed");
+                var momoAmountStr = HttpContext.Session.GetString("MomoAmount");
+
+                if (string.IsNullOrEmpty(shippingAddress) ||
+                    string.IsNullOrEmpty(selectedIdsStr) ||
+                    string.IsNullOrEmpty(walletUsedStr))
                 {
                     ViewBag.IsSuccess = false;
-                    ViewBag.Message = "Không tìm thấy địa chỉ giao hàng.";
+                    ViewBag.Message = "Thiếu thông tin thanh toán.";
                     return View();
                 }
 
@@ -52,11 +55,19 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     .Select(Guid.Parse)
                     .ToList();
 
-                var newOrder = await _checkoutService.CheckoutSuccessAsync(userId, shippingAddress, selectedCartItemIds);
+                decimal walletUsed = decimal.Parse(walletUsedStr);
+                decimal momoAmount = decimal.Parse(momoAmountStr ?? "0");
 
-                // Xóa session sau khi dùng
-                HttpContext.Session.Remove("ShippingAddress");
-                HttpContext.Session.Remove("SelectedCartItemIds");
+                // ⭐ GỌI SERVICE DUY NHẤT
+                var newOrder = await _checkoutService.ConfirmPaymentAsync(
+                    userId,
+                    shippingAddress,
+                    selectedCartItemIds,
+                    walletUsed,
+                    momoAmount
+                );
+
+                HttpContext.Session.Clear();
 
                 ViewBag.IsSuccess = true;
                 ViewBag.Message =

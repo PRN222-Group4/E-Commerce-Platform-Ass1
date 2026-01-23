@@ -15,13 +15,16 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         private readonly IPaymentRepository _paymentRepository;
         private readonly IMomoApi _momoApi;
         private readonly IOrderRepository _orderRepository;
+        private readonly IWalletRepository _walletRepository;
 
-        public RefundService(IRefundRepository refundRepository, IPaymentRepository paymentRepository, IMomoApi momoApi, IOrderRepository orderRepository)
+        public RefundService(IRefundRepository refundRepository, IPaymentRepository paymentRepository, IMomoApi momoApi, IOrderRepository orderRepository,
+            IWalletRepository walletRepository)
         {
             _refundRepository = refundRepository;
             _paymentRepository = paymentRepository;
             _momoApi = momoApi;
             _orderRepository = orderRepository;
+            _walletRepository = walletRepository;
         }
         public async Task RefundAsync(Guid orderId, decimal amount, string reason)
         {
@@ -67,6 +70,26 @@ namespace E_Commerce_Platform_Ass1.Service.Services
 
             order.Status = "CANCELLED";
             await _orderRepository.UpdateAsync(order);
+
+            var wallet = await _walletRepository.GetByUserIdAsync(order.UserId);
+            if (wallet == null)
+            {
+                wallet = new Wallet
+                {
+                    WalletId = Guid.NewGuid(),
+                    UserId = order.UserId,
+                    Balance = 0,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                await _walletRepository.AddAsync(wallet);
+            }
+
+            wallet.Balance += amount;
+            wallet.LastChangeAmount = amount;
+            wallet.LastChangeType = "Refund";
+            wallet.UpdatedAt = DateTime.UtcNow;
+
+            await _walletRepository.UpdateAsync(wallet);
         }
     }
 }
