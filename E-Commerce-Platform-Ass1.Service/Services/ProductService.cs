@@ -315,6 +315,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 ImageUrl = product.ImageUrl,
                 CreatedAt = product.CreatedAt,
                 ShopName = shopName,
+                CategoryName = product.Category?.Name,
             };
         }
     }
