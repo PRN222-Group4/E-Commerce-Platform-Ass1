@@ -26,7 +26,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Detail(Guid id)
         {
-            var shop = await _shopService.GetShopByIdAsync(id);
+            var shop = await _shopService.GetShopDtoByIdAsync(id);
             if (shop == null)
             {
                 return NotFound();
@@ -42,11 +42,20 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             var productsResult = await _productService.GetByShopIdAsync(id);
             var products =
                 productsResult.IsSuccess && productsResult.Data != null
-                    ? productsResult.Data.Where(p => p.Status == "Active").ToList()
+                    ? productsResult.Data.Where(p => p.Status == "active").ToList()
                     : new List<ProductDto>();
 
-            ViewBag.Products = products;
-            return View(shop);
+            var viewModel = new ShopDetailViewModel
+            {
+                Id = shop.Id,
+                ShopName = shop.ShopName,
+                Description = shop.Description,
+                Status = shop.Status,
+                CreatedAt = shop.CreatedAt,
+                Products = products,
+            };
+
+            return View(viewModel);
         }
 
         [Authorize]
@@ -127,7 +136,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return RedirectToAction("Login", "Authentication");
             }
 
-            var shop = await _shopService.GetShopByUserIdAsync(userId);
+            var shop = await _shopService.GetShopDtoByUserIdAsync(userId);
             if (shop == null)
             {
                 TempData["ErrorMessage"] = "Bạn chưa có shop. Vui lòng đăng ký shop trước.";
@@ -141,8 +150,18 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     ? productsResult.Data.ToList()
                     : new List<ProductDto>();
 
-            ViewBag.Products = products;
-            return View(shop);
+            var viewModel = new ShopDashboardViewModel
+            {
+                Id = shop.Id,
+                UserId = shop.UserId,
+                ShopName = shop.ShopName,
+                Description = shop.Description,
+                Status = shop.Status,
+                CreatedAt = shop.CreatedAt,
+                Products = products,
+            };
+
+            return View(viewModel);
         }
 
         /// <summary>
@@ -158,7 +177,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return RedirectToAction("Login", "Authentication");
             }
 
-            var shop = await _shopService.GetShopByUserIdAsync(userId);
+            var shop = await _shopService.GetShopDtoByUserIdAsync(userId);
             if (shop == null)
             {
                 TempData["ErrorMessage"] = "Bạn chưa có shop. Vui lòng đăng ký shop trước.";

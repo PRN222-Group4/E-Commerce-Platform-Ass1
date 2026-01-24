@@ -1,4 +1,5 @@
 using E_Commerce_Platform_Ass1.Data.Database;
+using E_Commerce_Platform_Ass1.Data.Momo;
 using E_Commerce_Platform_Ass1.Data.Repositories;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
 using E_Commerce_Platform_Ass1.Service.Services;
@@ -30,6 +31,8 @@ namespace E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions
             serviceCollection.AddScoped<IPaymentRepository, PaymentRepository>();
             serviceCollection.AddScoped<IReviewRepository, ReviewRepository>();
             serviceCollection.AddScoped<IShipmentRepository, ShipmentRepository>();
+            serviceCollection.AddScoped<IRefundRepository, RefundRepository>();
+            serviceCollection.AddScoped<IWalletRepository, WalletRepository>();
 
             // Register Services
             serviceCollection.AddScoped<IUserService, UserService>();
@@ -43,7 +46,11 @@ namespace E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions
             serviceCollection.AddScoped<IMomoService, MomoService>();
             serviceCollection.AddScoped<ICheckoutService, CheckoutService>();
             serviceCollection.AddScoped<IOrderService, OrderService>();
+            serviceCollection.AddScoped<IRefundService, RefundService>();
+            serviceCollection.AddScoped<IWalletService, WalletService>();
 
+            // Register External APIs
+            serviceCollection.AddScoped<IMomoApi, MomoApi>();
         }
     }
 }

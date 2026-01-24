@@ -1,9 +1,8 @@
-@model E_Commerce_Platform_Ass1.Data.Database.Entities.Shop
+@model E_Commerce_Platform_Ass1.Web.Models.ShopDetailViewModel
 @using E_Commerce_Platform_Ass1.Service.DTOs
 @{
     ViewData["Title"] = Model.ShopName;
     Layout = "~/Views/Shared/_EShopperLayout.cshtml";
-    var products = ViewBag.Products as List<ProductDto> ?? new List<ProductDto>();
 }
 
 <!-- Page Header Start -->
@@ -64,7 +63,7 @@
                     <div class="col-md-6 mb-3 mb-md-0">
                         <h3 class="font-weight-semi-bold mb-0">
                             <i class="fas fa-box text-primary mr-2"></i>Products 
-                            <span class="badge badge-primary badge-lg">@products.Count</span>
+                            <span class="badge badge-primary badge-lg">@Model.ProductCount</span>
                         </h3>
                     </div>
                     <div class="col-md-6">
@@ -93,11 +92,11 @@
                 </div>
             </div>
 
-            @if (products.Any())
+            @if (Model.Products.Any())
             {
                 <!-- Products Grid View -->
                 <div id="productsGridView" class="row">
-                    @foreach (var product in products)
+                    @foreach (var product in Model.Products)
                     {
                         <div class="col-lg-3 col-md-4 col-sm-6 mb-4 product-card-item" 
                              data-name="@product.Name.ToLower()" 
@@ -192,7 +191,7 @@
 
                 <!-- Products List View (Hidden by default) -->
                 <div id="productsListView" class="d-none">
-                    @foreach (var product in products)
+                    @foreach (var product in Model.Products)
                     {
                         <div class="card border-0 shadow-sm mb-3 product-list-item" 
                              data-name="@product.Name.ToLower()" 

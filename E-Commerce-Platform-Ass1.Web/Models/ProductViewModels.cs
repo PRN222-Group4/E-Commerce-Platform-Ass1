@@ -214,16 +214,25 @@ namespace E_Commerce_Platform_Ass1.Web.Models
     public class ProductDetailViewModel
     {
         public Guid Id { get; set; }
+        public Guid ShopId { get; set; }
+        public Guid CategoryId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public decimal BasePrice { get; set; }
         public string? ImageUrl { get; set; }
         public string Status { get; set; } = string.Empty;
         public string? CategoryName { get; set; }
+        public string? ShopName { get; set; }
         public decimal AvgRating { get; set; }
         public DateTime CreatedAt { get; set; }
-        public List<E_Commerce_Platform_Ass1.Service.DTOs.ProductVariantDto> Variants { get; set; } =
-            new();
+
+        // Variants
+        public List<ProductVariantItemViewModel> Variants { get; set; } = new();
+
+        // Reviews
+        public List<ProductReviewViewModel> Reviews { get; set; } = new();
+
+        public int ReviewCount => Reviews.Count;
 
         // Helper properties
         public string StatusBadgeClass =>

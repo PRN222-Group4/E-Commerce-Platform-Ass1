@@ -34,6 +34,33 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return await _shopRepository.GetByIdAsync(shopId);
         }
 
+        public async Task<ShopDto?> GetShopDtoByUserIdAsync(Guid userId)
+        {
+            var shop = await _shopRepository.GetByUserIdAsync(userId);
+            return shop == null ? null : MapToDto(shop);
+        }
+
+        public async Task<ShopDto?> GetShopDtoByIdAsync(Guid shopId)
+        {
+            var shop = await _shopRepository.GetByIdAsync(shopId);
+            return shop == null ? null : MapToDto(shop);
+        }
+
+        private static ShopDto MapToDto(Shop shop)
+        {
+            return new ShopDto
+            {
+                Id = shop.Id,
+                UserId = shop.UserId,
+                ShopName = shop.ShopName,
+                Description = shop.Description,
+                Status = shop.Status,
+                CreatedAt = shop.CreatedAt,
+                OwnerName = shop.User?.Name,
+                OwnerEmail = shop.User?.Email,
+            };
+        }
+
         public async Task<bool> UserHasShopAsync(Guid userId)
         {
             return await _shopRepository.ExistsByUserId(userId);

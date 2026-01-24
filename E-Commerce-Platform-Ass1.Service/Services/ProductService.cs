@@ -35,6 +35,59 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return products.ToList();
         }
 
+        /// <summary>
+        /// Lấy tất cả sản phẩm dưới dạng DTO (dùng cho Home page)
+        /// </summary>
+        public async Task<List<ProductDto>> GetAllProductsAsync()
+        {
+            var products = await _productRepository.GetAllAsync();
+            return products
+                .Where(p => p.Status == "active")
+                .Select(p => MapToDto(p, p.Shop?.ShopName))
+                .ToList();
+        }
+
+        /// <summary>
+        /// Lấy chi tiết sản phẩm bao gồm variants dưới dạng DTO (dùng cho Product Detail page)
+        /// </summary>
+        public async Task<ProductDetailDto?> GetProductDetailDtoAsync(Guid productId)
+        {
+            var product = await _productRepository.GetProductWithVariantsAsync(productId);
+            if (product == null)
+                return null;
+
+            return new ProductDetailDto
+            {
+                Id = product.Id,
+                ShopId = product.ShopId,
+                CategoryId = product.CategoryId,
+                Name = product.Name,
+                Description = product.Description,
+                BasePrice = product.BasePrice,
+                Status = product.Status,
+                AvgRating = product.AvgRating,
+                ImageUrl = product.ImageUrl,
+                CreatedAt = product.CreatedAt,
+                CategoryName = product.Category?.Name,
+                ShopName = product.Shop?.ShopName,
+                Variants =
+                    product
+                        .ProductVariants?.Select(v => new ProductVariantDto
+                        {
+                            Id = v.Id,
+                            VariantName = v.VariantName,
+                            Price = v.Price,
+                            Size = v.Size,
+                            Color = v.Color,
+                            Stock = v.Stock,
+                            Sku = v.Sku,
+                            Status = v.Status,
+                            ImageUrl = v.ImageUrl,
+                        })
+                        .ToList() ?? new List<ProductVariantDto>(),
+            };
+        }
+
         public async Task<Product?> GetProductWithVariantsAsync(Guid productId)
         {
             var product = await _productRepository.GetProductWithVariantsAsync(productId);
