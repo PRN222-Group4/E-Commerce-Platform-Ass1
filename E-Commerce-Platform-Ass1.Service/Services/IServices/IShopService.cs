@@ -14,6 +14,16 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
         Task<Shop> RegisterShopAsync(Guid userId, string shopName, string description);
 
         /// <summary>
+        /// Lấy thông tin Shop dưới dạng DTO (dùng cho Views)
+        /// </summary>
+        Task<ShopDto?> GetShopDtoByUserIdAsync(Guid userId);
+
+        /// <summary>
+        /// Lấy thông tin Shop dưới dạng DTO (dùng cho Views)
+        /// </summary>
+        Task<ShopDto?> GetShopDtoByIdAsync(Guid shopId);
+
+        /// <summary>
         /// Lấy thống kê tổng quan của Shop
         /// </summary>
         Task<ShopStatisticsDto> GetShopStatisticsAsync(Guid shopId);

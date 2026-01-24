@@ -2,24 +2,18 @@ using E_Commerce_Platform_Ass1.Data.Database;
 using E_Commerce_Platform_Ass1.Data.Momo;
 using E_Commerce_Platform_Ass1.Service.Common.Configurations;
 using E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions;
-using E_Commerce_Platform_Ass1.Data.Momo;
-using E_Commerce_Platform_Ass1.Data.Repositories;
-using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
-using E_Commerce_Platform_Ass1.Service.Services;
-using E_Commerce_Platform_Ass1.Service.Services.IServices;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Connect MomoAPI
+// Configure MomoAPI
 builder.Services.Configure<MomoConfig>(builder.Configuration.GetSection("MomoAPI"));
-
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-//Sessions
+// Sessions
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -42,29 +36,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 );
 
 // Configure Cloudinary
-builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("CloudinarySettings")
+);
 
+// Register all repositories & services via extension method
 builder.Services.AddService();
-
-// DI for repositories & services
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
-builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<IMomoService, MomoService>();
-builder.Services.AddScoped<ICheckoutService, CheckoutService>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IRefundRepository, RefundRepository>();
-builder.Services.AddScoped<IRefundService, RefundService>();
-builder.Services.AddScoped<IMomoApi, MomoApi>();
-builder.Services.AddScoped<IWalletRepository, WalletRepository>();
-builder.Services.AddScoped<IWalletService, WalletService>();
-
 
 var app = builder.Build();
 

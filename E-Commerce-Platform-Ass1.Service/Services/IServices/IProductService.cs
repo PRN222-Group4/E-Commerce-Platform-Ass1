@@ -10,11 +10,22 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
     public interface IProductService
     {
         /// <summary>
-        /// Tạo sản phẩm mới (draft)
+        /// Lấy tất cả sản phẩm (dùng cho Home page) - trả về DTO
         /// </summary>
+        Task<List<ProductDto>> GetAllProductsAsync();
+
+        /// <summary>
+        /// Lấy tất cả sản phẩm (legacy - trả về Entity) - sẽ deprecated
+        /// </summary>
+        [Obsolete("Use GetAllProductsAsync() instead")]
         Task<List<Product>> GetAllProductAsync();
 
         Task<Product?> GetProductWithVariantsAsync(Guid productId);
+
+        /// <summary>
+        /// Lấy chi tiết sản phẩm bao gồm variants (dùng cho Product Detail page) - trả về DTO
+        /// </summary>
+        Task<ProductDetailDto?> GetProductDetailDtoAsync(Guid productId);
 
         Task<ServiceResult<Guid>> CreateProductAsync(CreateProductDto dto);
 

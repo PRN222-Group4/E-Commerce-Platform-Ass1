@@ -196,7 +196,21 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 CategoryName = product.CategoryName,
                 AvgRating = product.AvgRating,
                 CreatedAt = product.CreatedAt,
-                Variants = product.Variants ?? new List<ProductVariantDto>(),
+                Variants =
+                    product
+                        .Variants?.Select(v => new ProductVariantItemViewModel
+                        {
+                            Id = v.Id,
+                            VariantName = v.VariantName,
+                            Price = v.Price,
+                            Size = v.Size ?? string.Empty,
+                            Color = v.Color ?? string.Empty,
+                            Stock = v.Stock,
+                            Sku = v.Sku,
+                            Status = v.Status,
+                            ImageUrl = v.ImageUrl ?? string.Empty,
+                        })
+                        .ToList() ?? new List<ProductVariantItemViewModel>(),
             };
 
             return View(viewModel);
