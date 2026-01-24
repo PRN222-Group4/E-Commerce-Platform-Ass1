@@ -40,14 +40,15 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
 
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
-            return await _context.Products.ToListAsync();
+            return await _context
+                .Products.Include(p => p.Category)
+                .Include(p => p.Shop)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Product>> GetByCategoryIdAsync(Guid categoryId)
         {
-            return await _context.Products
-                .Where(p => p.CategoryId == categoryId)
-                .ToListAsync();
+            return await _context.Products.Where(p => p.CategoryId == categoryId).ToListAsync();
         }
 
         public async Task<Product?> GetByIdAsync(Guid id)
@@ -57,15 +58,19 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
 
         public async Task<IEnumerable<Product>> GetByShopIdAsync(Guid shopId)
         {
-            return await _context.Products
+            return await _context
+                .Products.Include(p => p.Category)
                 .Where(p => p.ShopId == shopId)
                 .ToListAsync();
         }
 
         public async Task<Product?> GetProductWithVariantsAsync(Guid id)
         {
-            return await _context.Products
-                .Include(p => p.ProductVariants)
+            return await _context
+                .Products.Include(p => p.ProductVariants)
+                .Include(p => p.Category)
+                .Include(p => p.Shop)
+                .Include(p => p.Reviews)
                 .Where(p => p.Id == id)
                 .FirstOrDefaultAsync();
         }
