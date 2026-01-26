@@ -1,5 +1,5 @@
 ﻿using E_Commerce_Platform_Ass1.Data.Database.Entities;
-using E_Commerce_Platform_Ass1.Service.DTO.Response;
+using E_Commerce_Platform_Ass1.Service.DTOs;
 
 namespace E_Commerce_Platform_Ass1.Service.Services.IServices
 {

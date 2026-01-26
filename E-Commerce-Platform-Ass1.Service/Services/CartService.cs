@@ -1,6 +1,6 @@
 ﻿using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
-using E_Commerce_Platform_Ass1.Service.DTO.Response;
+using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
 
 namespace E_Commerce_Platform_Ass1.Service.Services

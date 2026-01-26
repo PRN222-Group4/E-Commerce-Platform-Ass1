@@ -1,4 +1,4 @@
-﻿namespace E_Commerce_Platform_Ass1.Service.DTO.Response
+﻿namespace E_Commerce_Platform_Ass1.Service.DTOs
 {
     public class CartItemViewModel
     {
