@@ -25,6 +25,7 @@ namespace E_Commerce_Platform_Ass1.Data.Database
         public DbSet<Cart> Carts { get; set; }
         public DbSet<Refund> Refunds { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<EKycVerification> EKycVerifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
