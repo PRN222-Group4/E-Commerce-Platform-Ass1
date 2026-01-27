@@ -1,6 +1,7 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
 using E_Commerce_Platform_Ass1.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -71,15 +72,15 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
 
             try
             {
-                var success = await _eKycService.VerifyAndSaveAsync(userId, model.FrontCard, model.BackCard, model.Selfie);
-                if (success)
+                var result = await _eKycService.VerifyAndSaveAsync(userId, model.FrontCard, model.BackCard, model.Selfie);
+                if (result.IsSuccess)
                 {
                     TempData["SuccessMessage"] = "Xác thực danh tính thành công!";
                     return RedirectToAction("Status");
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Xác thực danh tính thất bại. Vui lòng kiểm tra lại ảnh chụp và thử lại.");
+                    ModelState.AddModelError(string.Empty, result.Message ?? "Xác thực danh tính thất bại. Vui lòng kiểm tra lại ảnh chụp và thử lại.");
                     return View(model);
                 }
             }

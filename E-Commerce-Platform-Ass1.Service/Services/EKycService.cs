@@ -1,5 +1,6 @@
 ﻿using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
+using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
 using Microsoft.AspNetCore.Http;
 
@@ -21,12 +22,12 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return await _eKycRepository.IsUserVerifiedAsync(userId);
         }
 
-        public async Task<bool> VerifyAndSaveAsync(Guid userId, IFormFile front, IFormFile back, IFormFile selfie)
+        public async Task<EKycResult> VerifyAndSaveAsync(Guid userId, IFormFile front, IFormFile back, IFormFile selfie)
         {
             var result = await _vnptEKycService.VerifyAsync(front, back, selfie);
             if (!result.IsSuccess)
             {
-                return false;
+                return result;
             }
 
             var entity = new EKycVerification
@@ -42,7 +43,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             };
 
             await _eKycRepository.AddAsync(entity);
-            return true;
+            return result;
         }
     }
 }

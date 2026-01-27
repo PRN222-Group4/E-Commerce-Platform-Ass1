@@ -5,8 +5,6 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace E_Commerce_Platform_Ass1.Service.Services
 {
@@ -31,10 +29,18 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 if (faceMatch == null || faceMatch.similarity < 0.8)
                     return EKycResult.Fail("Khuôn mặt không khớp với ảnh trên CCCD (Tỉ lệ khớp thấp)");
 
-                return new EKycResult 
-                { 
-                    IsSuccess = true, 
-                    CCCDNumber = ocr.IdNumber, 
+                var frontLiveness = await CallCardLivenessAsync(frontCccd);
+                if (frontLiveness == null || !frontLiveness.Success)
+                    return EKycResult.Fail($"Giấy tờ mặt trước không hợp lệ: {frontLiveness?.Message ?? "Lỗi kiểm tra liveness"}");
+
+                var backLiveness = await CallCardLivenessAsync(backCccd);
+                if (backLiveness == null || !backLiveness.Success)
+                    return EKycResult.Fail($"Giấy tờ mặt sau không hợp lệ: {backLiveness?.Message ?? "Lỗi kiểm tra liveness"}");
+
+                return new EKycResult
+                {
+                    IsSuccess = true,
+                    CCCDNumber = ocr.IdNumber,
                     FullName = ocr.FullName,
                     FaceMatchScore = faceMatch.similarity
                 };
@@ -47,7 +53,6 @@ namespace E_Commerce_Platform_Ass1.Service.Services
 
         private async Task<OrcResultDto?> CallOcrAsync(IFormFile front, IFormFile back)
         {
-            // 1. Upload ảnh để lấy mã hash Minio (theo tài liệu OCR yêu cầu img_front/img_back là mã hash)
             string frontHash = await UploadFileAsync(front);
             string backHash = await UploadFileAsync(back);
 
@@ -58,7 +63,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 img_front = frontHash,
                 img_back = backHash,
                 client_session = $"WEB_DESKTOP_WINDOWS_DEVICE_1.0.0_EShopper_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
-                type = -1, // CMT/CCCD
+                type = -1,
                 validate_postcode = true,
                 token = Guid.NewGuid().ToString(),
                 crop_param = "0,0"
@@ -71,21 +76,15 @@ namespace E_Commerce_Platform_Ass1.Service.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                var methodWarning = response.StatusCode == System.Net.HttpStatusCode.MethodNotAllowed 
-                    ? " (Lưu ý: API báo lỗi 405. Vui lòng kiểm tra lại 'BaseUrl' trong appsettings.json, thường phải là https://api-ekyc.vnpt.vn)" 
-                    : "";
-                throw new Exception($"VNPT API Error (OCR): {response.StatusCode}{methodWarning} - {content}");
+                string errMsg = GetVNPTErrorMessage(content, "OCR");
+                throw new Exception(errMsg);
             }
-
-            if (content.Trim().StartsWith("<"))
-                throw new Exception("VNPT API đã trả về nội dung HTML thay vì dữ liệu. Có thể service đang bảo trì hoặc sai cấu hình URL.");
 
             return JsonConvert.DeserializeObject<OrcResultDto>(content);
         }
 
         private async Task<dynamic?> CallFaceMatchAsync(IFormFile front, IFormFile selfie)
         {
-            // 1. Upload ảnh selfie để lấy mã hash
             string frontHash = await UploadFileAsync(front);
             string faceHash = await UploadFileAsync(selfie);
 
@@ -105,30 +104,105 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             var content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception($"VNPT API Error (FaceMatch): {response.StatusCode} - {content}");
+            {
+                string errMsg = GetVNPTErrorMessage(content, "FaceMatch");
+                throw new Exception(errMsg);
+            }
 
             var jo = Newtonsoft.Json.Linq.JObject.Parse(content);
             if (jo["message"]?.ToString() != "IDG-00000000")
-                throw new Exception($"Face Match thất bại: {jo["message"]}");
+            {
+                string errMsg = GetVNPTErrorMessage(content, "Face Match");
+                throw new Exception(errMsg);
+            }
 
             var obj = jo["object"];
             return new
             {
                 result = obj?["result"]?.ToString(),
                 msg = obj?["msg"]?.ToString(),
-                similarity = (double)(obj?["prob"] ?? 0) / 100.0 // Chuyển từ % sang scale 0-1
+                similarity = (double)(obj?["prob"] ?? 0) / 100.0
             };
+        }
+
+        private async Task<dynamic?> CallCardLivenessAsync(IFormFile cardImg)
+        {
+            string hash = await UploadFileAsync(cardImg);
+
+            using var client = CreateHttpClient();
+
+            var requestBody = new
+            {
+                img = hash,
+                client_session = $"WEB_DESKTOP_WINDOWS_DEVICE_1.0.0_EShopper_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
+            };
+
+            var jsonContent = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync("ai/v1/card/liveness", jsonContent);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string errMsg = GetVNPTErrorMessage(content, "CardLiveness");
+                throw new Exception(errMsg);
+            }
+
+            var jo = Newtonsoft.Json.Linq.JObject.Parse(content);
+            var message = jo["message"]?.ToString();
+            var obj = jo["object"];
+
+            bool isSuccess = message == "IDG-00000000" && obj?["liveness"]?.ToString() == "success";
+            string displayMsg = obj?["liveness_msg"]?.ToString() ?? "Không xác định";
+
+            if (isSuccess && ((bool?)obj?["fake_liveness"] == true || (bool?)obj?["face_swapping"] == true))
+            {
+                isSuccess = false;
+                displayMsg = "Phát hiện giấy tờ có dấu hiệu giả mạo (chụp lại hoặc dán ảnh)";
+            }
+
+            return new
+            {
+                Success = isSuccess,
+                Message = isSuccess ? displayMsg : GetVNPTErrorMessage(content, "Card Liveness")
+            };
+        }
+
+        private string GetVNPTErrorMessage(string jsonContent, string defaultContext)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(jsonContent) || jsonContent.Trim().StartsWith("<"))
+                    return $"Lỗi kết nối VNPT API ({defaultContext}).";
+
+                var jo = Newtonsoft.Json.Linq.JObject.Parse(jsonContent);
+
+                var errors = jo["errors"] as Newtonsoft.Json.Linq.JArray;
+                if (errors != null && errors.Count > 0)
+                {
+                    return string.Join("; ", errors.Select(e => e.ToString()));
+                }
+
+                var message = jo["message"]?.ToString();
+                if (!string.IsNullOrEmpty(message) && message != "IDG-00000000")
+                {
+                    if (message.StartsWith("IDG-")) return $"Lỗi VNPT ({message})";
+                    return message;
+                }
+
+                return $"Lỗi không xác định từ VNPT ({defaultContext}).";
+            }
+            catch
+            {
+                return $"Lỗi phản hồi từ VNPT ({defaultContext}).";
+            }
         }
 
         private async Task<string> UploadFileAsync(IFormFile file)
         {
             using var client = CreateHttpClient();
             var form = new MultipartFormDataContent();
-            
-            // Theo chuẩn VNPT mới cung cấp:
-            // Endpoint: file-service/v1/addFile
-            // Fields: file, title, description
-            
+
             var streamContent = new StreamContent(file.OpenReadStream());
             streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType ?? "image/jpeg");
             form.Add(streamContent, "file", file.FileName);
@@ -139,22 +213,25 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             var content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception($"VNPT API Error (Upload): {response.StatusCode} - {content}");
+            {
+                string errMsg = GetVNPTErrorMessage(content, "Upload");
+                throw new Exception(errMsg);
+            }
 
-            // Sử dụng JObject để parse an toàn hơn dynamic
             var jo = Newtonsoft.Json.Linq.JObject.Parse(content);
             var message = jo["message"]?.ToString();
-            
+
             if (message != "IDG-00000000")
-                throw new Exception($"Upload ảnh thất bại: {message} - {content}");
+            {
+                string errMsg = GetVNPTErrorMessage(content, "Upload");
+                throw new Exception(errMsg);
+            }
 
             var obj = jo["object"];
             if (obj == null)
                 throw new Exception("Trường 'object' không tồn tại trong phản hồi upload.");
 
-            // Nếu obj là một object phức tạp, hãy lấy giá trị token/hash từ nó
-            // Nếu obj là chuỗi, lấy trực tiếp
-            string hash = obj.Type == Newtonsoft.Json.Linq.JTokenType.Object 
+            string hash = obj.Type == Newtonsoft.Json.Linq.JTokenType.Object
                 ? obj["hash"]?.ToString() ?? obj["id"]?.ToString() ?? obj.ToString()
                 : obj.ToString();
 
