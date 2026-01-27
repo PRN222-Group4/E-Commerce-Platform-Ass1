@@ -16,11 +16,13 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
     {
         private readonly IShopService _shopService;
         private readonly IProductService _productService;
+        private readonly IEkycService _eKycService;
 
-        public ShopController(IShopService shopService, IProductService productService)
+        public ShopController(IShopService shopService, IProductService productService, IEkycService eKycService)
         {
             _shopService = shopService;
             _productService = productService;
+            _eKycService = eKycService;
         }
 
         [AllowAnonymous]
@@ -78,6 +80,14 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return RedirectToAction("Profile", "Authentication");
             }
 
+            // Kiểm tra KYC
+            var isVerified = await _eKycService.IsUserVerifiedAsync(userId);
+            if (!isVerified)
+            {
+                TempData["ErrorMessage"] = "Bạn cần xác thực danh tính (KYC) trước khi đăng ký shop.";
+                return RedirectToAction("Index", "KYC");
+            }
+
             return View();
         }
 
@@ -105,6 +115,14 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     string.Empty,
                     "Bạn đã có shop rồi. Mỗi tài khoản chỉ được đăng ký một shop."
                 );
+                return View(model);
+            }
+
+            // Kiểm tra KYC
+            var isVerified = await _eKycService.IsUserVerifiedAsync(userId);
+            if (!isVerified)
+            {
+                ModelState.AddModelError(string.Empty, "Bạn cần xác thực danh tính (KYC) trước khi đăng ký shop.");
                 return View(model);
             }
 

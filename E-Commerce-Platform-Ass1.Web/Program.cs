@@ -1,6 +1,7 @@
 using E_Commerce_Platform_Ass1.Data.Database;
 using E_Commerce_Platform_Ass1.Data.Momo;
 using E_Commerce_Platform_Ass1.Service.Common.Configurations;
+using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,10 @@ builder.Services.Configure<CloudinarySettings>(
 
 // Register all repositories & services via extension method
 builder.Services.AddService();
+
+// Configure VnptEKyc
+builder.Services.Configure<VnptEKycConfig>(
+    builder.Configuration.GetSection("VnptEKyc"));
 
 var app = builder.Build();
 

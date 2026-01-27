@@ -1,0 +1,136 @@
+@model E_Commerce_Platform_Ass1.Web.Models.VerifyViewModel
+@{
+    ViewData["Title"] = "Xác thực danh tính";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+
+<div class="container-fluid py-5">
+    <div class="row px-xl-5">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="bg-light p-5 rounded shadow-sm">
+                <div class="text-center mb-5">
+                    <h2 class="font-weight-semi-bold mb-3">
+                        <i class="fas fa-id-card text-primary mr-2"></i>Xác thực danh tính (KYC)
+                    </h2>
+                    <p class="text-muted">Để bảo vệ cộng đồng và tuân thủ quy định, vui lòng xác thực danh tính của bạn trước khi bắt đầu kinh doanh.</p>
+                </div>
+
+                <form asp-action="Verify" method="post" enctype="multipart/form-data" class="kyc-form">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="row">
+                        <!-- Mặt trước CCCD -->
+                        <div class="col-md-6 mb-4">
+                            <label class="font-weight-semi-bold mb-2">Mặt trước CCCD/CMND <span class="text-danger">*</span></label>
+                            <div class="upload-container" id="front-upload">
+                                <input type="file" asp-for="FrontCard" class="d-none" accept="image/*" id="input-front" />
+                                <div class="upload-zone p-4 text-center border rounded" onclick="document.getElementById('input-front').click()">
+                                    <div class="upload-placeholder">
+                                        <i class="fas fa-camera fa-3x text-primary mb-3"></i>
+                                        <p class="mb-0">Nhấp để tải lên hoặc kéo thả ảnh</p>
+                                    </div>
+                                    <img id="preview-front" class="img-fluid d-none rounded" style="max-height: 200px;" />
+                                </div>
+                                <span asp-validation-for="FrontCard" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Mặt sau CCCD -->
+                        <div class="col-md-6 mb-4">
+                            <label class="font-weight-semi-bold mb-2">Mặt sau CCCD/CMND <span class="text-danger">*</span></label>
+                            <div class="upload-container" id="back-upload">
+                                <input type="file" asp-for="BackCard" class="d-none" accept="image/*" id="input-back" />
+                                <div class="upload-zone p-4 text-center border rounded" onclick="document.getElementById('input-back').click()">
+                                    <div class="upload-placeholder">
+                                        <i class="fas fa-camera fa-3x text-primary mb-3"></i>
+                                        <p class="mb-0">Nhấp để tải lên hoặc kéo thả ảnh</p>
+                                    </div>
+                                    <img id="preview-back" class="img-fluid d-none rounded" style="max-height: 200px;" />
+                                </div>
+                                <span asp-validation-for="BackCard" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="alert alert-info mt-4">
+                        <h6 class="font-weight-bold"><i class="fas fa-lightbulb mr-2"></i>Mẹo để xác thực thành công:</h6>
+                        <ul class="mb-0 small">
+                            <li>Ảnh chụp phải rõ nét, đủ ánh sáng, không bị lóa hoặc mờ.</li>
+                            <li>Giấy tờ tùy thân phải còn hạn sử dụng và không bị mất góc.</li>
+                            <li>Ảnh chân dung phải nhìn rõ khuôn mặt, không đeo kính râm hoặc đội mũ che khuất.</li>
+                        </ul>
+                    </div>
+
+                    <div class="form-group mb-0 mt-5">
+                        <button type="submit" class="btn btn-primary btn-block border-0 py-3 font-weight-bold" id="btn-submit">
+                            <i class="fas fa-shield-alt mr-2"></i>BẮT ĐẦU XÁC THỰC
+                        </button>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a asp-controller="Authentication" asp-action="Profile" class="text-primary">
+                            <i class="fas fa-arrow-left mr-1"></i>Quay lại hồ sơ
+                        </a>
+                    </div>
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .upload-zone {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px dashed #ddd !important;
+        background: #fbfbfb;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .upload-zone:hover {
+        border-color: #D19C97 !important;
+        background: #fff;
+    }
+
+    .upload-zone img {
+        max-width: 100%;
+        object-fit: contain;
+    }
+
+
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function handleImagePreview(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            const placeholder = preview.previousElementSibling;
+
+            input.onchange = evt => {
+                const [file] = input.files;
+                if (file) {
+                    preview.src = URL.createObjectURL(file);
+                    preview.classList.remove('d-none');
+                    placeholder.classList.add('d-none');
+                }
+            }
+        }
+
+        handleImagePreview('input-front', 'preview-front');
+        handleImagePreview('input-back', 'preview-back');
+
+
+
+
+    </script>
+}
