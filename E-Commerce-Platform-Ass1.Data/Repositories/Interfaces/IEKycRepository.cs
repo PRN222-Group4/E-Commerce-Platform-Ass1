@@ -6,5 +6,6 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories.Interfaces
     {
         Task AddAsync(EKycVerification entity);
         Task<bool> IsUserVerifiedAsync(Guid userId);
+        Task<bool> IsCccdNumberUsedAsync(string cccdNumber);
     }
 }

@@ -25,5 +25,11 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
             return await _context.EKycVerifications
             .AnyAsync(x => x.UserId == userId && x.Status == "VERIFIED");
         }
+
+        public async Task<bool> IsCccdNumberUsedAsync(string cccdNumber)
+        {
+            return await _context.EKycVerifications
+                .AnyAsync(x => x.CccdNumber == cccdNumber && x.Status == "VERIFIED");
+        }
     }
 }

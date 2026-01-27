@@ -30,6 +30,12 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return result;
             }
 
+            bool isCccdUsed = await _eKycRepository.IsCccdNumberUsedAsync(result.CCCDNumber);
+            if (isCccdUsed)
+            {
+                return EKycResult.Fail("Số CCCD này đã được sử dụng cho một tài khoản khác.");
+            }
+
             var entity = new EKycVerification
             {
                 Id = Guid.NewGuid(),
@@ -37,7 +43,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 CccdNumber = result.CCCDNumber,
                 FullName = result.FullName,
                 FaceMatchScore = result.FaceMatchScore,
-                Liveness = true,    
+                Liveness = true,
                 Status = "VERIFIED",
                 CreatedAt = DateTime.Now
             };
