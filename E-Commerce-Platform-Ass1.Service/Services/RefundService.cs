@@ -16,15 +16,17 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         private readonly IMomoApi _momoApi;
         private readonly IOrderRepository _orderRepository;
         private readonly IWalletRepository _walletRepository;
+        private readonly IShopWalletService _shopWalletService;
 
         public RefundService(IRefundRepository refundRepository, IPaymentRepository paymentRepository, IMomoApi momoApi, IOrderRepository orderRepository,
-            IWalletRepository walletRepository)
+            IWalletRepository walletRepository, IShopWalletService shopWalletService)
         {
             _refundRepository = refundRepository;
             _paymentRepository = paymentRepository;
             _momoApi = momoApi;
             _orderRepository = orderRepository;
             _walletRepository = walletRepository;
+            _shopWalletService = shopWalletService;
         }
         public async Task RefundAsync(Guid orderId, decimal amount, string reason)
         {
@@ -90,6 +92,24 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             wallet.UpdatedAt = DateTime.UtcNow;
 
             await _walletRepository.UpdateAsync(wallet);
+
+            // ⭐ TRỪ TIỀN TỪ VÍ SHOP
+            // Lấy order với full details để tìm ShopId từ OrderItems
+            var orderWithItems = await _orderRepository.GetByIdWithItemsAsync(orderId);
+            if (orderWithItems != null)
+            {
+                // Group theo shop và trừ tiền từ từng shop
+                var shopPayments = orderWithItems.OrderItems
+                    .Where(oi => oi.ProductVariant?.Product?.ShopId != null)
+                    .GroupBy(oi => oi.ProductVariant!.Product!.ShopId)
+                    .Select(g => new { ShopId = g.Key, Amount = g.Sum(i => i.Price * i.Quantity) })
+                    .ToList();
+
+                foreach (var shopPayment in shopPayments)
+                {
+                    await _shopWalletService.RefundOrderPaymentAsync(shopPayment.ShopId, orderId, shopPayment.Amount);
+                }
+            }
         }
     }
 }

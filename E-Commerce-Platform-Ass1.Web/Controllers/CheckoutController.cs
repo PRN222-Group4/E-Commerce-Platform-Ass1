@@ -10,11 +10,16 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
     {
         private readonly ICheckoutService _checkoutService;
         private readonly IUserService _userService;
+        private readonly IShopWalletService _shopWalletService;
 
-        public CheckoutController(ICheckoutService checkoutService, IUserService userService)
+        public CheckoutController(
+            ICheckoutService checkoutService, 
+            IUserService userService,
+            IShopWalletService shopWalletService)
         {
             _checkoutService = checkoutService;
             _userService = userService;
+            _shopWalletService = shopWalletService;
         }
 
         [HttpGet]
@@ -66,6 +71,9 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     walletUsed,
                     momoAmount
                 );
+
+                // ⭐ PHÂN PHỐI TIỀN CHO CÁC SHOP
+                await _shopWalletService.DistributeOrderPaymentAsync(newOrder.Id);
 
                 HttpContext.Session.Clear();
 

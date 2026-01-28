@@ -12,15 +12,18 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         private readonly IReturnRequestRepository _returnRequestRepository;
         private readonly IOrderRepository _orderRepository;
         private readonly IRefundService _refundService;
+        private readonly IShopWalletService _shopWalletService;
 
         public ReturnRequestService(
             IReturnRequestRepository returnRequestRepository,
             IOrderRepository orderRepository,
-            IRefundService refundService)
+            IRefundService refundService,
+            IShopWalletService shopWalletService)
         {
             _returnRequestRepository = returnRequestRepository;
             _orderRepository = orderRepository;
             _refundService = refundService;
+            _shopWalletService = shopWalletService;
         }
 
         #region Customer Methods
@@ -175,12 +178,16 @@ namespace E_Commerce_Platform_Ass1.Service.Services
 
             try
             {
-                // Gọi RefundService để hoàn tiền về ví (TÁI SỬ DỤNG)
+                // Gọi RefundService để hoàn tiền về ví khách hàng (TÁI SỬ DỤNG)
                 await _refundService.RefundAsync(
                     request.OrderId,
                     refundAmount,
                     $"Hoàn tiền theo yêu cầu #{request.Id}: {request.Reason}"
                 );
+
+                // ⭐ TRỪ TIỀN TỪ VÍ SHOP
+                // Sử dụng shopId (parameter) trực tiếp thay vì tìm lại từ OrderItems
+                await _shopWalletService.RefundOrderPaymentAsync(shopId, request.OrderId, refundAmount);
 
                 // Cập nhật trạng thái request
                 request.Status = "Approved";

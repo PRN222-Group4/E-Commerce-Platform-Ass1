@@ -162,6 +162,9 @@
                     <a asp-controller="ShopOrders" asp-action="Index" class="btn btn-outline-warning btn-block mb-2">
                         <i class="fas fa-shopping-bag mr-2"></i>Quản lý đơn hàng
                     </a>
+                    <a asp-controller="ShopWallet" asp-action="Index" class="btn btn-outline-success btn-block mb-2">
+                        <i class="fas fa-wallet mr-2"></i>Ví Shop
+                    </a>
                     @if (Model.Status == "Active")
                     {
                         <a asp-controller="Shop" asp-action="Statistics" class="btn btn-outline-info btn-block mb-2">
