@@ -14,16 +14,22 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         private readonly IOrderRepository _orderRepository;
         private readonly IShipmentRepository _shipmentRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IShopWalletService _shopWalletService;
+        private readonly IRefundService _refundService;
 
         public ShopOrderService(
             IOrderRepository orderRepository,
             IShipmentRepository shipmentRepository,
-            IUserRepository userRepository
+            IUserRepository userRepository,
+            IShopWalletService shopWalletService,
+            IRefundService refundService
         )
         {
             _orderRepository = orderRepository;
             _shipmentRepository = shipmentRepository;
             _userRepository = userRepository;
+            _shopWalletService = shopWalletService;
+            _refundService = refundService;
         }
 
         public async Task<ServiceResult<List<OrderDto>>> GetOrdersByShopIdAsync(Guid shopId)
@@ -401,6 +407,30 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return ServiceResult.Failure(
                     $"Chỉ có thể từ chối đơn hàng đang chờ xử lý. Status hiện tại: {order.Status}"
                 );
+            }
+
+            // Nếu đơn hàng đã thanh toán, cần:
+            // 1. Trừ tiền từ ví Shop
+            // 2. Hoàn tiền vào ví Khách hàng
+            if (statusReject == "paid")
+            {
+                // Tính tổng tiền sản phẩm của shop này trong đơn hàng
+                var shopAmount = order.OrderItems
+                    .Where(oi => oi.ProductVariant?.Product?.ShopId == shopId)
+                    .Sum(oi => oi.Price * oi.Quantity);
+
+                if (shopAmount > 0)
+                {
+                    // Trừ tiền từ ví Shop
+                    await _shopWalletService.RefundOrderPaymentAsync(shopId, orderId, shopAmount);
+                    
+                    // Hoàn tiền vào ví Khách hàng
+                    await _refundService.RefundAsync(
+                        orderId,
+                        shopAmount,
+                        "Hoàn tiền do Shop từ chối đơn hàng"
+                    );
+                }
             }
 
             order.Status = "Cancelled";

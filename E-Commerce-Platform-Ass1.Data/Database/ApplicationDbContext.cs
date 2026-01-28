@@ -27,6 +27,8 @@ namespace E_Commerce_Platform_Ass1.Data.Database
         public DbSet<EKycVerification> EKycVerifications { get; set; }
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
         public DbSet<ReturnRequest> ReturnRequests { get; set; } = null!;
+        public DbSet<ShopWallet> ShopWallets { get; set; } = null!;
+        public DbSet<ShopWalletTransaction> ShopWalletTransactions { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -51,6 +53,8 @@ namespace E_Commerce_Platform_Ass1.Data.Database
             modelBuilder.ApplyConfiguration(new EKycVerificationConfiguration());
             modelBuilder.ApplyConfiguration(new WalletTransactionConfiguration());
             modelBuilder.ApplyConfiguration(new ReturnRequestConfiguration());
+            modelBuilder.ApplyConfiguration(new ShopWalletConfiguration());
+            modelBuilder.ApplyConfiguration(new ShopWalletTransactionConfiguration());
         }
     }
 }

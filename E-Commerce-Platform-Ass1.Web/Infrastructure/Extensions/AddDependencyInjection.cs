@@ -34,6 +34,8 @@ namespace E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions
             serviceCollection.AddScoped<IEKycRepository, EKycRepository>();
             serviceCollection.AddScoped<IWalletTransactionRepository, WalletTransactionRepository>();
             serviceCollection.AddScoped<IReturnRequestRepository, ReturnRequestRepository>();
+            serviceCollection.AddScoped<IShopWalletRepository, ShopWalletRepository>();
+            serviceCollection.AddScoped<IShopWalletTransactionRepository, ShopWalletTransactionRepository>();
 
             // Register Services
             serviceCollection.AddScoped<IEmailService, EmailService>();
@@ -53,6 +55,7 @@ namespace E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions
             serviceCollection.AddScoped<IEkycService, EKycService>();
             serviceCollection.AddScoped<IVnptEKycService, VnptEKycService>();
             serviceCollection.AddScoped<IReturnRequestService, ReturnRequestService>();
+            serviceCollection.AddScoped<IShopWalletService, ShopWalletService>();
 
             // Register External APIs
             serviceCollection.AddScoped<IMomoApi, MomoApi>();
